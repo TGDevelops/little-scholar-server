@@ -31,6 +31,7 @@ RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY prisma ./prisma
+COPY openapi.yaml ./openapi.yaml
 COPY scripts/cloud-sql-entrypoint.sh ./scripts/cloud-sql-entrypoint.sh
 RUN chmod +x ./scripts/cloud-sql-entrypoint.sh
 EXPOSE 3000

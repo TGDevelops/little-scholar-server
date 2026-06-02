@@ -199,7 +199,21 @@ Error:
 
 ## API Documentation
 
-The OpenAPI spec is available in [`openapi.yaml`](./openapi.yaml).
+Swagger UI is available at `http://localhost:3000/docs` when the server is running.
+
+The raw OpenAPI spec is available at `http://localhost:3000/openapi.yaml` and in [`openapi.yaml`](./openapi.yaml).
+
+If your local `.env` points `DATABASE_URL` at Cloud SQL through `127.0.0.1:5432`, start Cloud SQL Auth Proxy before using Swagger:
+
+```bash
+npm run cloud-sql-proxy
+```
+
+Then start the API in another terminal:
+
+```bash
+npm run dev
+```
 
 ### Health Check
 
