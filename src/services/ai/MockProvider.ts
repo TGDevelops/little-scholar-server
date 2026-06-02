@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AIProvider, GenerateExamResult } from './AIProvider';
-import type { GenerateExamInput, GeneratedExam } from '../../validators/exam.validator';
+import type { GenerateExamInput, GeneratedExam, GeneratedQuestion } from '../../validators/exam.validator';
 
 export class MockProvider implements AIProvider {
   public readonly name = 'mock';
@@ -8,7 +8,7 @@ export class MockProvider implements AIProvider {
   async generateExam(input: GenerateExamInput): Promise<GenerateExamResult> {
     const examId = uuidv4();
 
-    const question = (i: number) => ({
+    const question = (i: number): GeneratedQuestion => ({
       id: uuidv4(),
       type: 'mcq',
       question: `Sample question ${i + 1} for ${input.subject}`,

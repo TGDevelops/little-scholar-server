@@ -59,4 +59,5 @@ export const generatedExamSchema = z.object({
 });
 
 export type GenerateExamInput = z.infer<typeof generateExamSchema>['body'];
+export type GeneratedQuestion = z.infer<typeof generatedQuestionSchema>;
 export type GeneratedExam = z.infer<typeof generatedExamSchema>;

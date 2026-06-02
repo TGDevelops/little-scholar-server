@@ -9,7 +9,7 @@ import type { AIProvider, GenerateExamResult } from './AIProvider';
 
 export class GeminiProvider implements AIProvider {
   public readonly name = 'gemini';
-  private readonly ai: GoogleGenAI;
+  private readonly ai: GoogleGenAI | null;
   private readonly apiKey?: string;
   private readonly useApiKey: boolean;
 
@@ -17,7 +17,9 @@ export class GeminiProvider implements AIProvider {
     this.apiKey = env.GEMINI_API_KEY;
     this.useApiKey = Boolean(this.apiKey);
 
-    if (!this.useApiKey) {
+    if (this.useApiKey) {
+      this.ai = null;
+    } else {
       // Fall back to Vertex AI via ADC
       configureGoogleApplicationCredentials();
       this.ai = new GoogleGenAI({
@@ -108,6 +110,10 @@ export class GeminiProvider implements AIProvider {
           text: output,
           usageMetadata: { totalTokenCount: data?.usageMetadata?.totalTokenCount ?? 0 }
         } as unknown as GenerateContentResponse;
+      }
+
+      if (!this.ai) {
+        throw new Error('AI provider not initialized');
       }
 
       return await this.ai.models.generateContent({
