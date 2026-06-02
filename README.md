@@ -68,15 +68,16 @@ The API runs at `http://localhost:3000` by default.
 
 ## Railway Deployment Notes
 
-Railway will not have your local `gcloud auth application-default login` credentials. For Railway, create a Google Cloud service account with permission to call Vertex AI, download its JSON key, and provide it to the service through an environment variable.
+Railway will not have your local `gcloud auth application-default login` credentials. For Railway, create a Google Cloud service account with permission to call Vertex AI and connect to Cloud SQL, download its JSON key, and provide it to the service through an environment variable.
 
 Recommended Railway variables:
 
 ```env
 NODE_ENV=production
-PORT=3000
-DATABASE_URL=your-supabase-pooled-postgres-url
-DIRECT_URL=your-supabase-direct-postgres-url
+DATABASE_URL=postgresql://DB_USER:DB_PASSWORD@127.0.0.1:5432/DB_NAME?schema=public
+DIRECT_URL=postgresql://DB_USER:DB_PASSWORD@127.0.0.1:5432/DB_NAME?schema=public
+CLOUD_SQL_INSTANCE_CONNECTION_NAME=your-project-id:your-region:your-instance-name
+CLOUD_SQL_PROXY_PORT=5432
 JWT_SECRET=replace-with-a-long-random-secret
 JWT_EXPIRES_IN=7d
 AI_PROVIDER=gemini
@@ -98,19 +99,33 @@ Use the printed value as `GOOGLE_APPLICATION_CREDENTIALS_BASE64` in Railway. The
 Required Google Cloud setup:
 
 - Enable Vertex AI API.
+- Enable Cloud SQL Admin API.
 - Grant the Railway service account `Vertex AI User` or a narrower equivalent role.
+- Grant the Railway service account `Cloud SQL Client` or a narrower equivalent role.
 - Keep the service account JSON only in Railway environment variables, never in Git.
 
-## Supabase Database
+## Google Cloud SQL Database
 
-Supabase works as the production database because it provides standard PostgreSQL. Use Supabase for the database only; authentication remains in this backend with JWT and bcrypt.
+Cloud SQL works as the production database because it provides standard PostgreSQL. Authentication remains in this backend with JWT and bcrypt.
 
-Use two connection strings:
+The Docker image starts Cloud SQL Auth Proxy when `CLOUD_SQL_INSTANCE_CONNECTION_NAME` is present. In that mode, Prisma connects to the proxy inside the container:
 
-- `DATABASE_URL`: Supabase pooled connection string for the running API.
-- `DIRECT_URL`: Supabase direct connection string for Prisma migrations.
+```env
+DATABASE_URL=postgresql://DB_USER:DB_PASSWORD@127.0.0.1:5432/DB_NAME?schema=public
+DIRECT_URL=postgresql://DB_USER:DB_PASSWORD@127.0.0.1:5432/DB_NAME?schema=public
+CLOUD_SQL_INSTANCE_CONNECTION_NAME=your-project-id:your-region:your-instance-name
+```
 
-For local development you can keep using Docker Postgres, or point both values at Supabase. For Railway deployment, set both values in Railway environment variables.
+The Cloud SQL Auth Proxy authenticates with `GOOGLE_APPLICATION_CREDENTIALS_BASE64`, opens `127.0.0.1:5432`, and forwards that local TCP connection to the Cloud SQL instance. The service account must have Cloud SQL Client access, and Cloud SQL Admin API must be enabled.
+
+If you choose a direct public-IP connection instead of the proxy, set `DATABASE_URL` and `DIRECT_URL` to the Cloud SQL public IP with `sslmode=require`, and make sure Cloud SQL authorized networks allow Railway egress:
+
+```env
+DATABASE_URL=postgresql://DB_USER:DB_PASSWORD@CLOUD_SQL_PUBLIC_IP:5432/DB_NAME?schema=public&sslmode=require
+DIRECT_URL=postgresql://DB_USER:DB_PASSWORD@CLOUD_SQL_PUBLIC_IP:5432/DB_NAME?schema=public&sslmode=require
+```
+
+For local development you can keep using Docker Postgres, or point both values at Cloud SQL.
 
 Run migrations from your machine or a trusted CI environment:
 
@@ -118,15 +133,23 @@ Run migrations from your machine or a trusted CI environment:
 npm run prisma:migrate
 ```
 
-If you run migrations against Supabase, make sure `.env` contains the Supabase `DATABASE_URL` and `DIRECT_URL` first.
+For production-style migration execution against an already-created Cloud SQL database, use:
+
+```bash
+npm run prisma:migrate:deploy
+```
+
+If you run migrations against Cloud SQL from your machine, start Cloud SQL Auth Proxy locally first or use a direct SSL connection string, then make sure `.env` contains the Cloud SQL `DATABASE_URL` and `DIRECT_URL`.
 
 ## Environment Variables
 
 | Name                                    | Purpose                                                                 |
 | --------------------------------------- | ----------------------------------------------------------------------- |
 | `PORT`                                  | HTTP server port                                                        |
-| `DATABASE_URL`                          | Runtime PostgreSQL connection string, Supabase pooled URL in production |
+| `DATABASE_URL`                          | Runtime PostgreSQL connection string                                    |
 | `DIRECT_URL`                            | Direct PostgreSQL connection string for Prisma migrations               |
+| `CLOUD_SQL_INSTANCE_CONNECTION_NAME`    | Cloud SQL instance connection name, enables Cloud SQL Auth Proxy        |
+| `CLOUD_SQL_PROXY_PORT`                  | Local proxy port inside the container, defaults to `5432`               |
 | `JWT_SECRET`                            | Secret for signing access tokens, minimum 32 chars                      |
 | `JWT_EXPIRES_IN`                        | JWT expiry, for example `7d`                                            |
 | `AI_PROVIDER`                           | Currently `gemini`                                                      |
@@ -144,6 +167,7 @@ npm run dev
 npm run build
 npm start
 npm run prisma:migrate
+npm run prisma:migrate:deploy
 npm run prisma:generate
 npm run prisma:studio
 npm run lint
