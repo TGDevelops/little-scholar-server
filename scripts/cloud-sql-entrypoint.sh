@@ -5,7 +5,10 @@ credentials_path="/tmp/little-scholar-google-credentials.json"
 proxy_port="${CLOUD_SQL_PROXY_PORT:-5432}"
 
 if [ -n "${GOOGLE_APPLICATION_CREDENTIALS_BASE64:-}" ] && [ -z "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
-  printf '%s' "$GOOGLE_APPLICATION_CREDENTIALS_BASE64" | base64 -d > "$credentials_path"
+  if ! printf '%s' "$GOOGLE_APPLICATION_CREDENTIALS_BASE64" | base64 -d > "$credentials_path"; then
+    echo "GOOGLE_APPLICATION_CREDENTIALS_BASE64 is not valid base64. Recreate it from the service account JSON and update the Railway variable." >&2
+    exit 1
+  fi
   chmod 600 "$credentials_path"
   export GOOGLE_APPLICATION_CREDENTIALS="$credentials_path"
 elif [ -n "${GOOGLE_APPLICATION_CREDENTIALS_JSON:-}" ] && [ -z "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then

@@ -91,10 +91,10 @@ CORS_ORIGIN=your-ios-or-admin-client-origin
 To create the base64 value locally:
 
 ```bash
-base64 -i service-account.json
+base64 -i service-account.json | tr -d '\n'
 ```
 
-Use the printed value as `GOOGLE_APPLICATION_CREDENTIALS_BASE64` in Railway. The app writes it to a temporary credentials file at runtime and points Google auth to it. For local development, you can keep using `gcloud auth application-default login` and leave `GOOGLE_APPLICATION_CREDENTIALS_BASE64` empty.
+Use the printed single-line value as `GOOGLE_APPLICATION_CREDENTIALS_BASE64` in Railway. The app writes it to a temporary credentials file at runtime and points Google auth to it. For local development, you can keep using `gcloud auth application-default login` and leave `GOOGLE_APPLICATION_CREDENTIALS_BASE64` empty.
 
 Required Google Cloud setup:
 
