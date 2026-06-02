@@ -1,6 +1,7 @@
-import { GoogleGenerativeAI, type GenerateContentResult } from '@google/generative-ai';
+import { GoogleGenAI, type GenerateContentResponse } from '@google/genai';
 import { v4 as uuidv4 } from 'uuid';
 import { env } from '../../config/env';
+import { configureGoogleApplicationCredentials } from '../../config/googleAuth';
 import { AppError } from '../../utils/AppError';
 import { buildExamGenerationPrompt } from '../../prompts/examGenerationPrompt';
 import { generatedExamSchema, type GenerateExamInput } from '../../validators/exam.validator';
@@ -8,24 +9,35 @@ import type { AIProvider, GenerateExamResult } from './AIProvider';
 
 export class GeminiProvider implements AIProvider {
   public readonly name = 'gemini';
-  private readonly model;
+  private readonly ai: GoogleGenAI;
+  private readonly apiKey?: string;
+  private readonly useApiKey: boolean;
 
   constructor() {
-    const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-    this.model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.5
-      }
-    });
+    this.apiKey = env.GEMINI_API_KEY;
+    this.useApiKey = Boolean(this.apiKey);
+
+    if (!this.useApiKey) {
+      // Fall back to Vertex AI via ADC
+      configureGoogleApplicationCredentials();
+      this.ai = new GoogleGenAI({
+        vertexai: true,
+        project: env.GOOGLE_CLOUD_PROJECT,
+        location: env.GOOGLE_CLOUD_LOCATION
+      });
+    }
   }
 
   async generateExam(input: GenerateExamInput): Promise<GenerateExamResult> {
     const examId = uuidv4();
     const prompt = buildExamGenerationPrompt(input, examId);
-    const result = await this.model.generateContent(prompt);
-    const rawText = result.response.text();
+    const result = await this.generateContent(prompt);
+    const rawText = result.text;
+
+    if (!rawText) {
+      throw new AppError('Gemini provider returned an empty response', 502);
+    }
+
     const parsedJson = this.parseJson(rawText);
     const exam = generatedExamSchema.parse(parsedJson);
 
@@ -48,16 +60,109 @@ export class GeminiProvider implements AIProvider {
     };
   }
 
+  private async generateContent(prompt: string): Promise<GenerateContentResponse> {
+    try {
+      if (this.useApiKey) {
+        // Direct REST call to Generative Language API v1 using API key
+        const url = `https://generativelanguage.googleapis.com/v1/models/${encodeURIComponent(
+          env.GEMINI_MODEL
+        )}:generateContent?key=${encodeURIComponent(this.apiKey as string)}`;
+
+        const body = {
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: prompt }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.5,
+            maxOutputTokens: 1500
+          }
+        };
+
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (!resp.ok) {
+          const txt = await resp.text();
+          throw new Error(`Generative API error: ${resp.status} ${txt}`);
+        }
+
+        const data = await resp.json();
+
+        // Extract text from the standard v1 response format
+        const output = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+        if (!output) {
+          throw new Error(
+            `No text in API response. Raw response: ${JSON.stringify(data)}`
+          );
+        }
+
+        // Normalize to expected shape from @google/genai
+        return {
+          text: output,
+          usageMetadata: { totalTokenCount: data?.usageMetadata?.totalTokenCount ?? 0 }
+        } as unknown as GenerateContentResponse;
+      }
+
+      return await this.ai.models.generateContent({
+        model: env.GEMINI_MODEL,
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          temperature: 0.5
+        }
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown Gemini provider error';
+
+      if (message.includes('Could not load the default credentials') || message.includes('ADC')) {
+        throw new AppError('Google Application Default Credentials are not configured', 502, {
+          provider: this.name,
+          reason: 'ADC_NOT_CONFIGURED',
+          action:
+            'Run `gcloud auth application-default login` locally or deploy with a service account.'
+        });
+      }
+
+      if (message.includes('PERMISSION_DENIED') || message.includes('403')) {
+        throw new AppError(
+          'Vertex AI request was denied for the configured Google Cloud project',
+          502,
+          {
+            provider: this.name,
+            reason: 'VERTEX_AI_PERMISSION_DENIED',
+            action:
+              'Enable Vertex AI API and grant the authenticated user or service account Vertex AI User permissions.'
+          }
+        );
+      }
+
+      throw new AppError('Gemini provider request failed', 502, {
+        provider: this.name
+      });
+    }
+  }
+
   private parseJson(rawText: string): unknown {
     try {
-      return JSON.parse(rawText);
+      // Remove markdown code fences if present (```json ... ```)
+      let cleanText = rawText.trim();
+      if (cleanText.startsWith('```')) {
+        cleanText = cleanText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+      }
+      return JSON.parse(cleanText);
     } catch {
       throw new AppError('AI provider returned invalid JSON', 502);
     }
   }
 
-  private getTokensUsed(result: GenerateContentResult): number {
-    const usageMetadata = result.response.usageMetadata;
-    return usageMetadata?.totalTokenCount ?? 0;
+  private getTokensUsed(result: GenerateContentResponse): number {
+    return result.usageMetadata?.totalTokenCount ?? 0;
   }
 }

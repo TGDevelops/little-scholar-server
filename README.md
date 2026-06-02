@@ -1,6 +1,6 @@
 # Little Scholar Backend
 
-Production-ready Node.js backend for the Little Scholar iOS app. The iOS app keeps child profiles, exams, attempts, results, and performance history locally with SwiftData. This backend handles authentication, protects the LLM API key, generates AI exam papers, tracks usage, and leaves room for subscriptions later.
+Production-ready Node.js backend for the Little Scholar iOS app. The iOS app keeps child profiles, exams, attempts, results, and performance history locally with SwiftData. This backend handles authentication, protects AI access behind the server, generates AI exam papers, tracks usage, and leaves room for subscriptions later.
 
 Firebase is not used.
 
@@ -28,28 +28,37 @@ npm install
 cp .env.example .env
 ```
 
-3. Update `.env` with a strong `JWT_SECRET` and your `GEMINI_API_KEY`.
+3. Update `.env` with a strong `JWT_SECRET`, `GOOGLE_CLOUD_PROJECT`, and `GOOGLE_CLOUD_LOCATION`.
 
-4. Start PostgreSQL:
+4. Configure Google Application Default Credentials for local Vertex AI calls:
+
+```bash
+gcloud auth application-default login
+gcloud config set project YOUR_PROJECT_ID
+```
+
+5. Make sure the Vertex AI API is enabled for the selected Google Cloud project.
+
+6. Start PostgreSQL:
 
 ```bash
 docker compose up -d
 ```
 
-5. Generate Prisma client and run migrations:
+7. Generate Prisma client and run migrations:
 
 ```bash
 npm run prisma:generate
 npm run prisma:migrate
 ```
 
-6. Optional seed:
+8. Optional seed:
 
 ```bash
 npm run prisma:seed
 ```
 
-7. Start development server:
+9. Start development server:
 
 ```bash
 npm run dev
@@ -57,17 +66,76 @@ npm run dev
 
 The API runs at `http://localhost:3000` by default.
 
+## Railway Deployment Notes
+
+Railway will not have your local `gcloud auth application-default login` credentials. For Railway, create a Google Cloud service account with permission to call Vertex AI, download its JSON key, and provide it to the service through an environment variable.
+
+Recommended Railway variables:
+
+```env
+NODE_ENV=production
+PORT=3000
+DATABASE_URL=your-supabase-pooled-postgres-url
+DIRECT_URL=your-supabase-direct-postgres-url
+JWT_SECRET=replace-with-a-long-random-secret
+JWT_EXPIRES_IN=7d
+AI_PROVIDER=gemini
+GOOGLE_CLOUD_PROJECT=your-project-id
+GOOGLE_CLOUD_LOCATION=us-central1
+GEMINI_MODEL=gemini-2.5-flash-lite
+GOOGLE_APPLICATION_CREDENTIALS_BASE64=base64-encoded-service-account-json
+CORS_ORIGIN=your-ios-or-admin-client-origin
+```
+
+To create the base64 value locally:
+
+```bash
+base64 -i service-account.json
+```
+
+Use the printed value as `GOOGLE_APPLICATION_CREDENTIALS_BASE64` in Railway. The app writes it to a temporary credentials file at runtime and points Google auth to it. For local development, you can keep using `gcloud auth application-default login` and leave `GOOGLE_APPLICATION_CREDENTIALS_BASE64` empty.
+
+Required Google Cloud setup:
+
+- Enable Vertex AI API.
+- Grant the Railway service account `Vertex AI User` or a narrower equivalent role.
+- Keep the service account JSON only in Railway environment variables, never in Git.
+
+## Supabase Database
+
+Supabase works as the production database because it provides standard PostgreSQL. Use Supabase for the database only; authentication remains in this backend with JWT and bcrypt.
+
+Use two connection strings:
+
+- `DATABASE_URL`: Supabase pooled connection string for the running API.
+- `DIRECT_URL`: Supabase direct connection string for Prisma migrations.
+
+For local development you can keep using Docker Postgres, or point both values at Supabase. For Railway deployment, set both values in Railway environment variables.
+
+Run migrations from your machine or a trusted CI environment:
+
+```bash
+npm run prisma:migrate
+```
+
+If you run migrations against Supabase, make sure `.env` contains the Supabase `DATABASE_URL` and `DIRECT_URL` first.
+
 ## Environment Variables
 
-| Name             | Purpose                                            |
-| ---------------- | -------------------------------------------------- |
-| `PORT`           | HTTP server port                                   |
-| `DATABASE_URL`   | PostgreSQL connection string                       |
-| `JWT_SECRET`     | Secret for signing access tokens, minimum 32 chars |
-| `JWT_EXPIRES_IN` | JWT expiry, for example `7d`                       |
-| `GEMINI_API_KEY` | Server-side Gemini API key                         |
-| `AI_PROVIDER`    | Currently `gemini`                                 |
-| `CORS_ORIGIN`    | Allowed client origin or `*`                       |
+| Name                                    | Purpose                                                                 |
+| --------------------------------------- | ----------------------------------------------------------------------- |
+| `PORT`                                  | HTTP server port                                                        |
+| `DATABASE_URL`                          | Runtime PostgreSQL connection string, Supabase pooled URL in production |
+| `DIRECT_URL`                            | Direct PostgreSQL connection string for Prisma migrations               |
+| `JWT_SECRET`                            | Secret for signing access tokens, minimum 32 chars                      |
+| `JWT_EXPIRES_IN`                        | JWT expiry, for example `7d`                                            |
+| `AI_PROVIDER`                           | Currently `gemini`                                                      |
+| `GOOGLE_CLOUD_PROJECT`                  | Google Cloud project for Vertex AI                                      |
+| `GOOGLE_CLOUD_LOCATION`                 | Vertex AI location, for example `us-central1`                           |
+| `GEMINI_MODEL`                          | Vertex Gemini model, defaults to `gemini-2.5-flash-lite`                |
+| `GOOGLE_APPLICATION_CREDENTIALS_BASE64` | Base64 service account JSON for Railway/deployments                     |
+| `GOOGLE_APPLICATION_CREDENTIALS_JSON`   | Raw service account JSON fallback                                       |
+| `CORS_ORIGIN`                           | Allowed client origin or `*`                                            |
 
 ## Scripts
 
@@ -276,4 +344,4 @@ npm run prisma:studio
 
 ## AI Provider Abstraction
 
-The controller calls `examService`, which depends on the `AIProvider` interface. `GeminiProvider` is the current implementation. OpenAI or Claude providers can be added under `src/services/ai` and selected from `createAIProvider` without changing controller logic.
+The controller calls `examService`, which depends on the `AIProvider` interface. `GeminiProvider` is the current implementation and uses Vertex AI with Google Application Default Credentials locally. In production, deploy the backend with a Cloud Run service account that has permission to call Vertex AI. OpenAI or Claude providers can be added under `src/services/ai` and selected from `createAIProvider` without changing controller logic.
