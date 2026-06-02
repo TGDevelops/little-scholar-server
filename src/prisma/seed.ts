@@ -9,7 +9,9 @@ async function main(): Promise<void> {
     where: { email },
     update: {},
     create: {
+      name: 'Demo Parent',
       email,
+      city: 'Demo City',
       passwordHash
     }
   });

@@ -8,7 +8,9 @@ const SALT_ROUNDS = 12;
 
 const publicUserSelect = {
   id: true,
+  name: true,
   email: true,
+  city: true,
   createdAt: true,
   updatedAt: true
 } as const;
@@ -28,7 +30,9 @@ export const authService = {
 
     const user = await prisma.user.create({
       data: {
+        name: input.name,
         email: input.email,
+        city: input.city,
         passwordHash
       },
       select: publicUserSelect
@@ -59,7 +63,9 @@ export const authService = {
     return {
       user: {
         id: user.id,
+        name: user.name,
         email: user.email,
+        city: user.city,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       },

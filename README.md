@@ -226,7 +226,9 @@ Request:
 
 ```json
 {
+  "name": "Tejesh Gangari",
   "email": "parent@example.com",
+  "city": "Hyderabad",
   "password": "Password123!"
 }
 ```
@@ -239,7 +241,9 @@ Response:
   "data": {
     "user": {
       "id": "user-uuid",
+      "name": "Tejesh Gangari",
       "email": "parent@example.com",
+      "city": "Hyderabad",
       "createdAt": "2026-05-28T00:00:00.000Z",
       "updatedAt": "2026-05-28T00:00:00.000Z"
     },
@@ -281,7 +285,9 @@ Response:
   "data": {
     "user": {
       "id": "user-uuid",
+      "name": "Tejesh Gangari",
       "email": "parent@example.com",
+      "city": "Hyderabad",
       "createdAt": "2026-05-28T00:00:00.000Z",
       "updatedAt": "2026-05-28T00:00:00.000Z"
     }
@@ -351,7 +357,7 @@ The backend does not implement `/api/exams/evaluate` in the MVP. Generated quest
 
 Models:
 
-- `User`: authentication account with unique email and bcrypt hash
+- `User`: authentication account with name, unique email, city, and bcrypt hash
 - `UsageLog`: per-user AI usage tracking by provider, token count, and operation type
 
 Run migrations with:

@@ -37,7 +37,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AuthRequest'
+              $ref: '#/components/schemas/RegisterRequest'
       responses:
         '201':
           description: User registered
@@ -64,7 +64,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AuthRequest'
+              $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
           description: User logged in
@@ -188,7 +188,35 @@ components:
                 timestamp:
                   type: string
                   format: date-time
-    AuthRequest:
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - city
+        - password
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Tejesh Gangari
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          example: parent@example.com
+        city:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Hyderabad
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          example: Password123!
+    LoginRequest:
       type: object
       required:
         - email
@@ -208,16 +236,24 @@ components:
       type: object
       required:
         - id
+        - name
         - email
+        - city
         - createdAt
         - updatedAt
       properties:
         id:
           type: string
           format: uuid
+        name:
+          type: string
+          example: Tejesh Gangari
         email:
           type: string
           format: email
+        city:
+          type: string
+          example: Hyderabad
         createdAt:
           type: string
           format: date-time
