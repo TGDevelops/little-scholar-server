@@ -21,6 +21,12 @@ export class GeminiProvider implements AIProvider {
       this.ai = null;
     } else {
       // Fall back to Vertex AI via ADC
+      if (!env.GOOGLE_CLOUD_PROJECT) {
+        throw new Error(
+          'GOOGLE_CLOUD_PROJECT is required when not using GEMINI_API_KEY'
+        );
+      }
+
       configureGoogleApplicationCredentials();
       this.ai = new GoogleGenAI({
         vertexai: true,
