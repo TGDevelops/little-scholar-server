@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
-export const gradeSchema = z.enum(['LKG', 'UKG', 'Grade 1']);
+export const gradeSchema = z.enum(['Nursery', 'LKG', 'UKG', 'Grade 1']);
 export const subjectSchema = z.enum(['English', 'Maths', 'Hindi', 'EVS', 'GK']);
 export const difficultySchema = z.enum(['Easy', 'Medium', 'Hard']);
-export const questionTypeSchema = z.enum(['mcq', 'true_false', 'fill_blank', 'match_following']);
+export const questionTypeSchema = z.enum(['mcq', 'true_false', 'fill_blank']);
 
 export const generateExamSchema = z.object({
   body: z.object({

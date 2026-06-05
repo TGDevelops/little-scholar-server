@@ -1,0 +1,600 @@
+openapi: 3.1.0
+info:
+  title: Little Scholar Backend API
+  version: 1.0.0
+  description: >
+    API specification for the Little Scholar backend. The service provides
+    health checks, parent authentication, user profile details, and AI exam
+    generation for the Little Scholar iOS app.
+servers:
+  - url: /
+    description: Same origin as the Swagger UI
+  - url: https://little-scholar-server-production.up.railway.app
+    description: Railway deployment
+tags:
+  - name: Health
+    description: Service status endpoints.
+  - name: Auth
+    description: Parent registration, login, and current-user endpoints.
+  - name: Exams
+    description: AI exam generation endpoints.
+paths:
+  /api/health:
+    get:
+      tags:
+        - Health
+      operationId: getHealth
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Service health status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                ok:
+                  value:
+                    success: true
+                    data:
+                      status: ok
+                      service: little-scholar-be
+                      timestamp: '2026-05-28T00:00:00.000Z'
+  /api/auth/register:
+    post:
+      tags:
+        - Auth
+      operationId: registerUser
+      summary: Register a user
+      description: Creates a parent account and returns a JWT access token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              default:
+                value:
+                  name: Tejesh Gangari
+                  email: parent@example.com
+                  city: Hyderabad
+                  password: Password123!
+      responses:
+        '201':
+          description: User registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                registered:
+                  value:
+                    success: true
+                    data:
+                      user:
+                        id: 7c7912ff-f961-41fd-8b46-b746f2e47cc1
+                        name: Tejesh Gangari
+                        email: parent@example.com
+                        city: Hyderabad
+                        createdAt: '2026-05-28T00:00:00.000Z'
+                        updatedAt: '2026-05-28T00:00:00.000Z'
+                      accessToken: jwt-token
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          description: Email is already registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                duplicateEmail:
+                  value:
+                    success: false
+                    error:
+                      message: Email is already registered
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      operationId: loginUser
+      summary: Log in a user
+      description: Authenticates a parent account and returns a JWT access token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              default:
+                value:
+                  email: parent@example.com
+                  password: Password123!
+      responses:
+        '200':
+          description: User logged in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                loggedIn:
+                  value:
+                    success: true
+                    data:
+                      user:
+                        id: 7c7912ff-f961-41fd-8b46-b746f2e47cc1
+                        name: Tejesh Gangari
+                        email: parent@example.com
+                        city: Hyderabad
+                        createdAt: '2026-05-28T00:00:00.000Z'
+                        updatedAt: '2026-05-28T00:00:00.000Z'
+                      accessToken: jwt-token
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+  /api/auth/me:
+    get:
+      tags:
+        - Auth
+      operationId: getCurrentUser
+      summary: Get current authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+              examples:
+                currentUser:
+                  value:
+                    success: true
+                    data:
+                      user:
+                        id: 7c7912ff-f961-41fd-8b46-b746f2e47cc1
+                        name: Tejesh Gangari
+                        email: parent@example.com
+                        city: Hyderabad
+                        createdAt: '2026-05-28T00:00:00.000Z'
+                        updatedAt: '2026-05-28T00:00:00.000Z'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+  /api/exams/generate:
+    post:
+      tags:
+        - Exams
+      operationId: generateExam
+      summary: Generate an AI exam paper
+      description: Generates an exam paper with correct answers for local iOS evaluation.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateExamRequest'
+            examples:
+              default:
+                value:
+                  grade: UKG
+                  subject: Maths
+                  difficulty: Easy
+                  questionCount: 10
+      responses:
+        '201':
+          description: Generated exam paper.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateExamResponse'
+              examples:
+                generatedExam:
+                  value:
+                    success: true
+                    data:
+                      examId: 3791cf6e-8f01-46d1-ae47-6c95f9f8935a
+                      grade: UKG
+                      subject: Maths
+                      difficulty: Easy
+                      questionCount: 10
+                      questions:
+                        - id: q1
+                          type: mcq
+                          question: What comes after 5?
+                          options:
+                            - '4'
+                            - '6'
+                            - '7'
+                            - '3'
+                          correctAnswer: '6'
+                          acceptableAnswers:
+                            - '6'
+                            - six
+                          explanation: 6 comes after 5.
+                          topic: Number sequence
+                          marks: 1
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '502':
+          description: AI provider returned invalid or contract-breaking output.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                providerError:
+                  value:
+                    success: false
+                    error:
+                      message: Gemini provider request failed
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    ValidationError:
+      description: Request validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            validationFailed:
+              value:
+                success: false
+                error:
+                  message: Validation failed
+                  details:
+                    body:
+                      email:
+                        - Invalid email
+    AuthError:
+      description: Missing, invalid, or expired access token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            authRequired:
+              value:
+                success: false
+                error:
+                  message: Authentication required
+    RateLimitError:
+      description: Too many requests.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            tooManyRequests:
+              value:
+                success: false
+                error:
+                  message: Too many requests, please try again later
+  schemas:
+    ApiSuccess:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data: {}
+      additionalProperties: false
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          const: false
+        error:
+          type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+            details:
+              description: Optional validation or provider details.
+          additionalProperties: false
+      additionalProperties: false
+    HealthResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - status
+                - service
+                - timestamp
+              properties:
+                status:
+                  type: string
+                  example: ok
+                service:
+                  type: string
+                  example: little-scholar-be
+                timestamp:
+                  type: string
+                  format: date-time
+              additionalProperties: false
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - city
+        - password
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Tejesh Gangari
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          example: parent@example.com
+        city:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Hyderabad
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          example: Password123!
+      additionalProperties: false
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          example: parent@example.com
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+          example: Password123!
+      additionalProperties: false
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - city
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Tejesh Gangari
+        email:
+          type: string
+          format: email
+          example: parent@example.com
+        city:
+          type: string
+          example: Hyderabad
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    AuthPayload:
+      type: object
+      required:
+        - user
+        - accessToken
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        accessToken:
+          type: string
+          description: JWT access token. Pass as an Authorization Bearer token.
+      additionalProperties: false
+    AuthResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/AuthPayload'
+    MeResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - user
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+              additionalProperties: false
+    Grade:
+      type: string
+      enum:
+        - LKG
+        - UKG
+        - Grade 1
+    Subject:
+      type: string
+      enum:
+        - English
+        - Maths
+        - Hindi
+        - EVS
+        - GK
+    Difficulty:
+      type: string
+      enum:
+        - Easy
+        - Medium
+        - Hard
+    QuestionType:
+      type: string
+      enum:
+        - mcq
+        - true_false
+        - fill_blank
+        - match_following
+    GenerateExamRequest:
+      type: object
+      required:
+        - grade
+        - subject
+        - difficulty
+        - questionCount
+      properties:
+        grade:
+          $ref: '#/components/schemas/Grade'
+        subject:
+          $ref: '#/components/schemas/Subject'
+        difficulty:
+          $ref: '#/components/schemas/Difficulty'
+        questionCount:
+          type: integer
+          minimum: 1
+          maximum: 25
+          example: 10
+      additionalProperties: false
+    ExamQuestion:
+      type: object
+      required:
+        - id
+        - type
+        - question
+        - correctAnswer
+        - explanation
+        - topic
+        - marks
+      properties:
+        id:
+          type: string
+          minLength: 1
+          example: q1
+        type:
+          $ref: '#/components/schemas/QuestionType'
+        question:
+          type: string
+          minLength: 1
+          example: What comes after 5?
+        options:
+          type: array
+          items:
+            type: string
+          example:
+            - '4'
+            - '6'
+            - '7'
+            - '3'
+        correctAnswer:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+            - type: object
+              additionalProperties:
+                type: string
+          example: '6'
+        acceptableAnswers:
+          type: array
+          items:
+            type: string
+          example:
+            - '6'
+            - six
+        explanation:
+          type: string
+          minLength: 1
+          example: 6 comes after 5.
+        topic:
+          type: string
+          minLength: 1
+          example: Number sequence
+        marks:
+          type: integer
+          minimum: 1
+          example: 1
+      additionalProperties: false
+    ExamPaper:
+      type: object
+      required:
+        - examId
+        - grade
+        - subject
+        - difficulty
+        - questionCount
+        - questions
+      properties:
+        examId:
+          type: string
+          format: uuid
+        grade:
+          $ref: '#/components/schemas/Grade'
+        subject:
+          $ref: '#/components/schemas/Subject'
+        difficulty:
+          $ref: '#/components/schemas/Difficulty'
+        questionCount:
+          type: integer
+          minimum: 1
+        questions:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ExamQuestion'
+      additionalProperties: false
+    GenerateExamResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ExamPaper'
