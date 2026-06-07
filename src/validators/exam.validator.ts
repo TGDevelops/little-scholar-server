@@ -5,14 +5,27 @@ export const subjectSchema = z.enum(['English', 'Maths', 'Hindi', 'EVS', 'GK']);
 export const difficultySchema = z.enum(['Easy', 'Medium', 'Hard']);
 export const questionTypeSchema = z.enum(['mcq', 'true_false', 'fill_blank']);
 
-export const generateExamSchema = z.object({
-  body: z.object({
-    grade: gradeSchema,
-    subject: subjectSchema,
-    difficulty: difficultySchema,
-    questionCount: z.number().int().min(1).max(25)
+export const generateExamSchema = z
+  .object({
+    body: z
+      .object({
+        childId: z.string().uuid().optional(),
+        grade: gradeSchema.optional(),
+        subject: subjectSchema,
+        difficulty: difficultySchema,
+        questionCount: z.number().int().min(1).max(25)
+      })
+      .strict()
   })
-});
+  .superRefine((value, ctx) => {
+    if (!value.body.childId && !value.body.grade) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['body', 'childId'],
+        message: 'childId is required when grade is not provided'
+      });
+    }
+  });
 
 export const generatedQuestionSchema = z
   .object({
@@ -59,5 +72,8 @@ export const generatedExamSchema = z.object({
 });
 
 export type GenerateExamInput = z.infer<typeof generateExamSchema>['body'];
+export type ResolvedGenerateExamInput = Omit<GenerateExamInput, 'grade'> & {
+  grade: z.infer<typeof gradeSchema>;
+};
 export type GeneratedQuestion = z.infer<typeof generatedQuestionSchema>;
 export type GeneratedExam = z.infer<typeof generatedExamSchema>;

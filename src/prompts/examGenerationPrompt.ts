@@ -1,6 +1,9 @@
-import type { GenerateExamInput } from '../validators/exam.validator';
+import type { ResolvedGenerateExamInput } from '../validators/exam.validator';
 
-export const buildExamGenerationPrompt = (input: GenerateExamInput, examId: string): string => {
+export const buildExamGenerationPrompt = (
+  input: ResolvedGenerateExamInput,
+  examId: string
+): string => {
   return JSON.stringify({
     role: 'Little Scholar exam paper generator',
     task: 'Generate one exam paper as valid JSON only.',

@@ -4,13 +4,17 @@ import type {
   GenerateAnalyticsInsightResult,
   GenerateExamResult
 } from './AIProvider';
-import type { GenerateExamInput, GeneratedExam, GeneratedQuestion } from '../../validators/exam.validator';
+import type {
+  GeneratedExam,
+  GeneratedQuestion,
+  ResolvedGenerateExamInput
+} from '../../validators/exam.validator';
 import type { GenerateAnalyticsInsightInput } from '../../validators/analytics.validator';
 
 export class MockProvider implements AIProvider {
   public readonly name = 'mock';
 
-  async generateExam(input: GenerateExamInput): Promise<GenerateExamResult> {
+  async generateExam(input: ResolvedGenerateExamInput): Promise<GenerateExamResult> {
     const examId = uuidv4();
 
     const question = (i: number): GeneratedQuestion => ({

@@ -1,0 +1,3454 @@
+{
+  "info": {
+    "_postman_id": "371c39f2-428f-4dbc-be19-7052327c82f5",
+    "name": "Little Scholar Backend API",
+    "description": "API specification for the Little Scholar backend. The service provides health checks, parent authentication, child profiles, AI exam generation, synced exam attempts, performance summaries, usage quotas, and AI learning insights for the Little Scholar iOS app.\n",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "api",
+      "item": [
+        {
+          "name": "health",
+          "item": [
+            {
+              "name": "Health check",
+              "id": "717e7dc1-3c40-45ba-9546-b011330569c2",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "health"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "id": "cf8625b5-bfb6-4145-851c-d14caa732dc9",
+                  "name": "Service health status.",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/health",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "health"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"ok\",\n    \"service\": \"little-scholar-be\",\n    \"timestamp\": \"2026-05-28T00:00:00.000Z\"\n  }\n}"
+                }
+              ]
+            }
+          ],
+          "id": "72b303e8-9f96-40e0-8225-eb100f0c1d0e"
+        },
+        {
+          "name": "auth",
+          "item": [
+            {
+              "name": "register",
+              "item": [
+                {
+                  "name": "Register a user",
+                  "id": "4b5110a4-4b78-47c1-a1cb-9807fd62ac1b",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Tejesh Gangari\",\n  \"email\": \"parent@example.com\",\n  \"city\": \"Hyderabad\",\n  \"password\": \"Password123!\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/auth/register",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "auth",
+                        "register"
+                      ]
+                    },
+                    "description": "Creates a parent account and returns a JWT access token."
+                  },
+                  "response": [
+                    {
+                      "id": "61d7deeb-8b52-4093-9fca-5db12e247988",
+                      "name": "User registered.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"Tejesh Gangari\",\n  \"email\": \"parent@example.com\",\n  \"city\": \"Hyderabad\",\n  \"password\": \"Password123!\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/auth/register",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "auth",
+                            "register"
+                          ]
+                        }
+                      },
+                      "status": "Created",
+                      "code": 201,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": true,\n  \"data\": {\n    \"user\": {\n      \"id\": \"7c7912ff-f961-41fd-8b46-b746f2e47cc1\",\n      \"name\": \"Tejesh Gangari\",\n      \"email\": \"parent@example.com\",\n      \"city\": \"Hyderabad\",\n      \"plan\": \"FREE\",\n      \"createdAt\": \"2026-05-28T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-28T00:00:00.000Z\"\n    },\n    \"accessToken\": \"jwt-token\"\n  }\n}"
+                    },
+                    {
+                      "id": "71d56d06-e0d6-4a80-90a8-7b0a8a963385",
+                      "name": "Request validation failed.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"Tejesh Gangari\",\n  \"email\": \"parent@example.com\",\n  \"city\": \"Hyderabad\",\n  \"password\": \"Password123!\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/auth/register",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "auth",
+                            "register"
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Validation failed\",\n    \"details\": {\n      \"body\": {\n        \"email\": [\n          \"Invalid email\"\n        ]\n      }\n    }\n  }\n}"
+                    },
+                    {
+                      "id": "55ae6270-3256-4207-b90f-0644045d36a5",
+                      "name": "Email is already registered.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"Tejesh Gangari\",\n  \"email\": \"parent@example.com\",\n  \"city\": \"Hyderabad\",\n  \"password\": \"Password123!\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/auth/register",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "auth",
+                            "register"
+                          ]
+                        }
+                      },
+                      "status": "Conflict",
+                      "code": 409,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Email is already registered\"\n  }\n}"
+                    },
+                    {
+                      "id": "bd6c7a0a-2642-4ab6-8c61-13d0adace533",
+                      "name": "Too many requests.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"Tejesh Gangari\",\n  \"email\": \"parent@example.com\",\n  \"city\": \"Hyderabad\",\n  \"password\": \"Password123!\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/auth/register",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "auth",
+                            "register"
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Too many requests, please try again later\"\n  }\n}"
+                    }
+                  ]
+                }
+              ],
+              "id": "275f93e5-6e64-42f0-b969-9c3c8acbc3ab"
+            },
+            {
+              "name": "login",
+              "item": [
+                {
+                  "name": "Log in a user",
+                  "id": "99bfcf57-aee7-4ec4-88a2-924c154a5d8d",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"parent@example.com\",\n  \"password\": \"Password123!\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/auth/login",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "auth",
+                        "login"
+                      ]
+                    },
+                    "description": "Authenticates a parent account and returns a JWT access token."
+                  },
+                  "response": [
+                    {
+                      "id": "48a7f366-9929-4ba8-b4d3-bc228befaa03",
+                      "name": "User logged in.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"email\": \"parent@example.com\",\n  \"password\": \"Password123!\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/auth/login",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "auth",
+                            "login"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": true,\n  \"data\": {\n    \"user\": {\n      \"id\": \"7c7912ff-f961-41fd-8b46-b746f2e47cc1\",\n      \"name\": \"Tejesh Gangari\",\n      \"email\": \"parent@example.com\",\n      \"city\": \"Hyderabad\",\n      \"plan\": \"FREE\",\n      \"createdAt\": \"2026-05-28T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-28T00:00:00.000Z\"\n    },\n    \"accessToken\": \"jwt-token\"\n  }\n}"
+                    },
+                    {
+                      "id": "2c233a4b-9401-4a03-83d8-0b0a12205db3",
+                      "name": "Request validation failed.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"email\": \"parent@example.com\",\n  \"password\": \"Password123!\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/auth/login",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "auth",
+                            "login"
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Validation failed\",\n    \"details\": {\n      \"body\": {\n        \"email\": [\n          \"Invalid email\"\n        ]\n      }\n    }\n  }\n}"
+                    },
+                    {
+                      "id": "a82268e3-e5c9-401a-8b55-598c92ca323b",
+                      "name": "Missing, invalid, or expired access token.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"email\": \"parent@example.com\",\n  \"password\": \"Password123!\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/auth/login",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "auth",
+                            "login"
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                    },
+                    {
+                      "id": "f8440b09-9c21-45df-9211-f2b9fac9af19",
+                      "name": "Too many requests.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"email\": \"parent@example.com\",\n  \"password\": \"Password123!\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/auth/login",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "auth",
+                            "login"
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Too many requests, please try again later\"\n  }\n}"
+                    }
+                  ]
+                }
+              ],
+              "id": "cd24c3bd-34ad-4972-9d5c-d1fd51f76d63"
+            },
+            {
+              "name": "me",
+              "item": [
+                {
+                  "name": "Get current authenticated user",
+                  "id": "1d088b7e-8495-47fc-ad37-6c5936c6a730",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{bearerToken}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/auth/me",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "auth",
+                        "me"
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "id": "f232938e-645b-4236-8a5d-94bb2e28bd27",
+                      "name": "Current user.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/auth/me",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "auth",
+                            "me"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": true,\n  \"data\": {\n    \"user\": {\n      \"id\": \"7c7912ff-f961-41fd-8b46-b746f2e47cc1\",\n      \"name\": \"Tejesh Gangari\",\n      \"email\": \"parent@example.com\",\n      \"city\": \"Hyderabad\",\n      \"plan\": \"FREE\",\n      \"createdAt\": \"2026-05-28T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-28T00:00:00.000Z\"\n    }\n  }\n}"
+                    },
+                    {
+                      "id": "b84f9786-29c8-4134-95df-df1d95d5cc4f",
+                      "name": "Missing, invalid, or expired access token.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/auth/me",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "auth",
+                            "me"
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                    },
+                    {
+                      "id": "d3a48a64-82e5-4ffd-bafd-6b106946ca4c",
+                      "name": "Too many requests.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/auth/me",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "auth",
+                            "me"
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Too many requests, please try again later\"\n  }\n}"
+                    }
+                  ]
+                }
+              ],
+              "id": "98b07447-38f6-4b4b-bbb0-734592b8d4f8"
+            }
+          ],
+          "id": "51a013a1-461e-435b-b295-a4a5d35457b1"
+        },
+        {
+          "name": "exams",
+          "item": [
+            {
+              "name": "generate",
+              "item": [
+                {
+                  "name": "Generate an AI exam paper",
+                  "id": "dbe6319d-c001-4110-90c6-ee133342aff7",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{bearerToken}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"grade\": \"UKG\",\n  \"subject\": \"Maths\",\n  \"difficulty\": \"Easy\",\n  \"questionCount\": 10\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/exams/generate",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "exams",
+                        "generate"
+                      ]
+                    },
+                    "description": "Generates an exam paper with correct answers for local iOS evaluation."
+                  },
+                  "response": [
+                    {
+                      "id": "8d312165-d8ab-4daa-8ad3-11d68ec32433",
+                      "name": "Generated exam paper.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"grade\": \"UKG\",\n  \"subject\": \"Maths\",\n  \"difficulty\": \"Easy\",\n  \"questionCount\": 10\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/exams/generate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "exams",
+                            "generate"
+                          ]
+                        }
+                      },
+                      "status": "Created",
+                      "code": 201,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": true,\n  \"data\": {\n    \"examId\": \"3791cf6e-8f01-46d1-ae47-6c95f9f8935a\",\n    \"grade\": \"UKG\",\n    \"subject\": \"Maths\",\n    \"difficulty\": \"Easy\",\n    \"questionCount\": 10,\n    \"questions\": [\n      {\n        \"id\": \"q1\",\n        \"type\": \"mcq\",\n        \"question\": \"What comes after 5?\",\n        \"options\": [\n          \"4\",\n          \"6\",\n          \"7\",\n          \"3\"\n        ],\n        \"correctAnswer\": \"6\",\n        \"acceptableAnswers\": [\n          \"6\",\n          \"six\"\n        ],\n        \"explanation\": \"6 comes after 5.\",\n        \"topic\": \"Number sequence\",\n        \"marks\": 1\n      }\n    ],\n    \"usage\": {\n      \"tokensUsed\": 900,\n      \"remainingTokens\": 9100,\n      \"monthlyLimit\": 10000\n    }\n  }\n}"
+                    },
+                    {
+                      "id": "c7b34922-6603-412d-a57e-a6f516621c7d",
+                      "name": "Request validation failed.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"grade\": \"UKG\",\n  \"subject\": \"Maths\",\n  \"difficulty\": \"Easy\",\n  \"questionCount\": 10\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/exams/generate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "exams",
+                            "generate"
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Validation failed\",\n    \"details\": {\n      \"body\": {\n        \"email\": [\n          \"Invalid email\"\n        ]\n      }\n    }\n  }\n}"
+                    },
+                    {
+                      "id": "eb925fff-5c83-4e90-9ff9-85ac3b5840a1",
+                      "name": "Missing, invalid, or expired access token.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"grade\": \"UKG\",\n  \"subject\": \"Maths\",\n  \"difficulty\": \"Easy\",\n  \"questionCount\": 10\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/exams/generate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "exams",
+                            "generate"
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                    },
+                    {
+                      "id": "61258cd7-5c5d-4929-ad49-f15c5c0b49bc",
+                      "name": "quotaReached",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"grade\": \"UKG\",\n  \"subject\": \"Maths\",\n  \"difficulty\": \"Easy\",\n  \"questionCount\": 10\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/exams/generate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "exams",
+                            "generate"
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Monthly AI usage limit reached.\"\n  }\n}"
+                    },
+                    {
+                      "id": "c7cad645-cb1d-4eea-9acf-2cf8cd07ca3d",
+                      "name": "tooManyRequests",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"grade\": \"UKG\",\n  \"subject\": \"Maths\",\n  \"difficulty\": \"Easy\",\n  \"questionCount\": 10\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/exams/generate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "exams",
+                            "generate"
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Too many requests, please try again later\"\n  }\n}"
+                    },
+                    {
+                      "id": "28e6f61b-1065-46b1-a412-a46d1454e073",
+                      "name": "AI provider returned invalid or contract-breaking output.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"grade\": \"UKG\",\n  \"subject\": \"Maths\",\n  \"difficulty\": \"Easy\",\n  \"questionCount\": 10\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/exams/generate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "exams",
+                            "generate"
+                          ]
+                        }
+                      },
+                      "status": "Bad Gateway",
+                      "code": 502,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Gemini provider request failed\"\n  }\n}"
+                    }
+                  ]
+                }
+              ],
+              "id": "57ed2e7c-9383-4d01-aa8c-18fff40cfa94"
+            }
+          ],
+          "id": "300738e3-ca2d-48dc-a00d-6c7101662b34"
+        },
+        {
+          "name": "children",
+          "item": [
+            {
+              "name": "{childId}",
+              "item": [
+                {
+                  "name": "Update a child profile",
+                  "id": "5583a280-28b2-446b-a754-7985c7a0566a",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{bearerToken}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"string\",\n  \"age\": 6,\n  \"grade\": \"LKG\",\n  \"avatarUrl\": \"https://dATeMawVw.juquBhpkGU+RVrEcG7XBlqw11YYsaSCA73VmVnC0nGjDqqzXLaOmRvv\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/children/:childId",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "children",
+                        ":childId"
+                      ],
+                      "variable": [
+                        {
+                          "key": "childId",
+                          "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "id": "468dcc27-3b17-4b05-9665-846cdc554a4c",
+                      "name": "Child profile updated.",
+                      "originalRequest": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"string\",\n  \"age\": 6,\n  \"grade\": \"LKG\",\n  \"avatarUrl\": \"https://dATeMawVw.juquBhpkGU+RVrEcG7XBlqw11YYsaSCA73VmVnC0nGjDqqzXLaOmRvv\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/children/:childId",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "children",
+                            ":childId"
+                          ],
+                          "variable": [
+                            {
+                              "key": "childId",
+                              "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"data\": {\n    \"id\": \"2cf8ae0e-21e8-c225-0872-816d1e3e0cc9\",\n    \"userId\": \"dbce3cbd-5ddc-5bac-3d26-b96e11b0f1c3\",\n    \"name\": \"string\",\n    \"age\": 6936,\n    \"grade\": \"LKG\",\n    \"createdAt\": \"1980-01-13T13:52:50.021Z\",\n    \"updatedAt\": \"1946-09-14T11:25:26.719Z\",\n    \"avatarUrl\": \"http://q.fryhk.aDd\"\n  }\n}"
+                    },
+                    {
+                      "id": "0a200b82-3483-4122-8edb-346d4dba3699",
+                      "name": "Request validation failed.",
+                      "originalRequest": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"string\",\n  \"age\": 6,\n  \"grade\": \"LKG\",\n  \"avatarUrl\": \"https://dATeMawVw.juquBhpkGU+RVrEcG7XBlqw11YYsaSCA73VmVnC0nGjDqqzXLaOmRvv\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/children/:childId",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "children",
+                            ":childId"
+                          ],
+                          "variable": [
+                            {
+                              "key": "childId",
+                              "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Validation failed\",\n    \"details\": {\n      \"body\": {\n        \"email\": [\n          \"Invalid email\"\n        ]\n      }\n    }\n  }\n}"
+                    },
+                    {
+                      "id": "ef4b39f7-890e-44c4-a73d-4faec5e7a58c",
+                      "name": "Missing, invalid, or expired access token.",
+                      "originalRequest": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"string\",\n  \"age\": 6,\n  \"grade\": \"LKG\",\n  \"avatarUrl\": \"https://dATeMawVw.juquBhpkGU+RVrEcG7XBlqw11YYsaSCA73VmVnC0nGjDqqzXLaOmRvv\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/children/:childId",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "children",
+                            ":childId"
+                          ],
+                          "variable": [
+                            {
+                              "key": "childId",
+                              "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                    },
+                    {
+                      "id": "c79a8124-43cb-425c-9c9c-7be249a6ca16",
+                      "name": "Requested resource was not found for the authenticated user.",
+                      "originalRequest": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"string\",\n  \"age\": 6,\n  \"grade\": \"LKG\",\n  \"avatarUrl\": \"https://dATeMawVw.juquBhpkGU+RVrEcG7XBlqw11YYsaSCA73VmVnC0nGjDqqzXLaOmRvv\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/children/:childId",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "children",
+                            ":childId"
+                          ],
+                          "variable": [
+                            {
+                              "key": "childId",
+                              "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Not Found",
+                      "code": 404,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Child profile not found\"\n  }\n}"
+                    }
+                  ]
+                },
+                {
+                  "name": "Delete a child profile",
+                  "id": "45b19cfb-6368-427f-942a-1e3f68d9290a",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{bearerToken}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/children/:childId",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "children",
+                        ":childId"
+                      ],
+                      "variable": [
+                        {
+                          "key": "childId",
+                          "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "id": "c2fb0c61-e619-4403-9b1e-1b58d7ee9fff",
+                      "name": "Child profile deleted.",
+                      "originalRequest": {
+                        "method": "DELETE",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/children/:childId",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "children",
+                            ":childId"
+                          ],
+                          "variable": [
+                            {
+                              "key": "childId",
+                              "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": true,\n  \"data\": {\n    \"deleted\": false\n  }\n}"
+                    },
+                    {
+                      "id": "9a46162b-9661-4ca8-b7d1-87b421879130",
+                      "name": "Missing, invalid, or expired access token.",
+                      "originalRequest": {
+                        "method": "DELETE",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/children/:childId",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "children",
+                            ":childId"
+                          ],
+                          "variable": [
+                            {
+                              "key": "childId",
+                              "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                    },
+                    {
+                      "id": "edc9628a-85bf-4e2f-8e86-0eff9aea9342",
+                      "name": "Requested resource was not found for the authenticated user.",
+                      "originalRequest": {
+                        "method": "DELETE",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/children/:childId",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "children",
+                            ":childId"
+                          ],
+                          "variable": [
+                            {
+                              "key": "childId",
+                              "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Not Found",
+                      "code": 404,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Child profile not found\"\n  }\n}"
+                    }
+                  ]
+                }
+              ],
+              "id": "52b0758e-948a-42e2-b95f-ad3234c020b0"
+            },
+            {
+              "name": "Create a child profile",
+              "id": "66112065-d798-4458-b96f-6a88ae7c9669",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{bearerToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Aarav\",\n  \"age\": 6,\n  \"grade\": \"UKG\",\n  \"avatarUrl\": \"http://ApLBNlTzfUJNHIhnz.qpvGiiRf40yVphR+1z4Ib0JUT7\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/children",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "children"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "id": "a113ae68-3268-47cd-839b-2a0aa80a1093",
+                  "name": "Child profile created.",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Aarav\",\n  \"age\": 6,\n  \"grade\": \"UKG\",\n  \"avatarUrl\": \"http://ApLBNlTzfUJNHIhnz.qpvGiiRf40yVphR+1z4Ib0JUT7\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/children",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "children"
+                      ]
+                    }
+                  },
+                  "status": "Created",
+                  "code": 201,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"data\": {\n    \"id\": \"2cf8ae0e-21e8-c225-0872-816d1e3e0cc9\",\n    \"userId\": \"dbce3cbd-5ddc-5bac-3d26-b96e11b0f1c3\",\n    \"name\": \"string\",\n    \"age\": 6936,\n    \"grade\": \"LKG\",\n    \"createdAt\": \"1980-01-13T13:52:50.021Z\",\n    \"updatedAt\": \"1946-09-14T11:25:26.719Z\",\n    \"avatarUrl\": \"http://q.fryhk.aDd\"\n  }\n}"
+                },
+                {
+                  "id": "64336daf-763d-45fe-9c18-c4aa282bb8ca",
+                  "name": "Request validation failed.",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Aarav\",\n  \"age\": 6,\n  \"grade\": \"UKG\",\n  \"avatarUrl\": \"http://ApLBNlTzfUJNHIhnz.qpvGiiRf40yVphR+1z4Ib0JUT7\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/children",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "children"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Validation failed\",\n    \"details\": {\n      \"body\": {\n        \"email\": [\n          \"Invalid email\"\n        ]\n      }\n    }\n  }\n}"
+                },
+                {
+                  "id": "aa358d58-5b2c-45b9-9cc1-de1d87e4fe53",
+                  "name": "Missing, invalid, or expired access token.",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Aarav\",\n  \"age\": 6,\n  \"grade\": \"UKG\",\n  \"avatarUrl\": \"http://ApLBNlTzfUJNHIhnz.qpvGiiRf40yVphR+1z4Ib0JUT7\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/children",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "children"
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                }
+              ]
+            },
+            {
+              "name": "List child profiles",
+              "id": "03793d41-97fe-49f0-a134-bce09de2a49f",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{bearerToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/children",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "children"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "id": "d4d09513-a5fb-4faf-ada4-bf71a927e587",
+                  "name": "Child profiles for the authenticated parent.",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/children",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "children"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"baea7cca-4d3e-377e-e0dd-bcf4ce68254f\",\n      \"userId\": \"002c6755-f2c5-e909-e756-37ae8ec93408\",\n      \"name\": \"string\",\n      \"age\": 9709,\n      \"grade\": \"Nursery\",\n      \"createdAt\": \"2006-02-22T03:03:41.143Z\",\n      \"updatedAt\": \"1946-12-16T05:56:45.266Z\",\n      \"avatarUrl\": null\n    },\n    {\n      \"id\": \"c3d7b95d-47c6-6aad-aab8-389c0dabb8f0\",\n      \"userId\": \"1ac8edab-4ccd-a2e5-54fa-b8e7db62dd80\",\n      \"name\": \"string\",\n      \"age\": 8474,\n      \"grade\": \"Nursery\",\n      \"createdAt\": \"1989-01-11T13:23:47.528Z\",\n      \"updatedAt\": \"1984-11-04T07:34:09.719Z\",\n      \"avatarUrl\": null\n    }\n  ]\n}"
+                },
+                {
+                  "id": "1beb32db-cfc4-406b-bd6c-285f2247e84d",
+                  "name": "Missing, invalid, or expired access token.",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/children",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "children"
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                }
+              ]
+            }
+          ],
+          "id": "9c7f952a-fece-43a7-a1e4-3e403d5cfa30"
+        },
+        {
+          "name": "exam-attempts",
+          "item": [
+            {
+              "name": "children",
+              "item": [
+                {
+                  "name": "{childId}",
+                  "item": [
+                    {
+                      "name": "List synced attempts for a child",
+                      "id": "fc5d3aa4-ab4e-4fa3-bd8a-b9adc3e4b693",
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      },
+                      "request": {
+                        "auth": {
+                          "type": "bearer",
+                          "bearer": [
+                            {
+                              "key": "token",
+                              "value": "{{bearerToken}}",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/exam-attempts/children/:childId",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "exam-attempts",
+                            "children",
+                            ":childId"
+                          ],
+                          "variable": [
+                            {
+                              "key": "childId",
+                              "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "id": "223b3ad7-943b-4483-82fe-456e6b82e152",
+                          "name": "Synced attempts for the child.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/exam-attempts/children/:childId",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "exam-attempts",
+                                "children",
+                                ":childId"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "childId",
+                                  "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"5b15e6cc-dd21-2e4e-2f5c-1a62fd4d97f4\",\n      \"userId\": \"93d7ffd0-05cc-7ddc-bc73-14f9545820f3\",\n      \"childId\": \"5f8adfe6-8968-92df-afef-ebe09916d0ca\",\n      \"grade\": \"Grade 1\",\n      \"subject\": \"Hindi\",\n      \"difficulty\": \"Hard\",\n      \"questionCount\": 1818,\n      \"correctAnswers\": 1102,\n      \"scorePercentage\": 1207.1406432456322,\n      \"strongTopics\": [\n        \"string\",\n        \"string\"\n      ],\n      \"weakTopics\": [\n        \"string\",\n        \"string\"\n      ],\n      \"attemptedAt\": \"1975-07-03T00:30:14.138Z\",\n      \"createdAt\": \"1969-06-05T00:10:05.718Z\",\n      \"updatedAt\": \"1997-09-14T09:26:55.012Z\",\n      \"examId\": null,\n      \"totalMarks\": 5769,\n      \"earnedMarks\": null,\n      \"timeSpentSeconds\": null,\n      \"answers\": \"\"\n    },\n    {\n      \"id\": \"4c55e5db-8451-c02e-7d74-33237eea1d83\",\n      \"userId\": \"e8f2976a-8e3f-4e1f-2332-7c1a6254d92e\",\n      \"childId\": \"41099513-c13a-d6a0-03b4-31684641ec7e\",\n      \"grade\": \"LKG\",\n      \"subject\": \"Maths\",\n      \"difficulty\": \"Easy\",\n      \"questionCount\": 1703,\n      \"correctAnswers\": 1677,\n      \"scorePercentage\": 2301.2333410285346,\n      \"strongTopics\": [\n        \"string\",\n        \"string\"\n      ],\n      \"weakTopics\": [\n        \"string\",\n        \"string\"\n      ],\n      \"attemptedAt\": \"1996-08-24T08:14:34.477Z\",\n      \"createdAt\": \"1975-04-06T09:38:52.368Z\",\n      \"updatedAt\": \"2008-05-05T10:31:00.881Z\",\n      \"examId\": null,\n      \"totalMarks\": 4148,\n      \"earnedMarks\": null,\n      \"timeSpentSeconds\": null,\n      \"answers\": \"\"\n    }\n  ]\n}"
+                        },
+                        {
+                          "id": "a8906348-b9d0-4e2b-a8cb-c9bc446eddd9",
+                          "name": "Missing, invalid, or expired access token.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/exam-attempts/children/:childId",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "exam-attempts",
+                                "children",
+                                ":childId"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "childId",
+                                  "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                        },
+                        {
+                          "id": "9bd2ee8d-b664-488e-88f8-6d1fdfde9e2b",
+                          "name": "Requested resource was not found for the authenticated user.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/exam-attempts/children/:childId",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "exam-attempts",
+                                "children",
+                                ":childId"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "childId",
+                                  "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Not Found",
+                          "code": 404,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Child profile not found\"\n  }\n}"
+                        }
+                      ]
+                    }
+                  ],
+                  "id": "2f229947-d73e-4ab6-81f1-995f317afaff"
+                }
+              ],
+              "id": "140c6c5b-2fc5-4d1a-84c3-b79575dde2db"
+            },
+            {
+              "name": "Sync an exam attempt",
+              "id": "d1b1ca6f-4ac5-4795-acf2-98463194194d",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{bearerToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"childId\": \"88703273-19bd-7546-c2ef-d2a9a8026133\",\n  \"subject\": \"Hindi\",\n  \"difficulty\": \"Medium\",\n  \"questionCount\": 16,\n  \"correctAnswers\": 36,\n  \"examId\": \"string\",\n  \"grade\": \"Grade 1\",\n  \"totalMarks\": 787,\n  \"earnedMarks\": 819,\n  \"scorePercentage\": 69.13669370492809,\n  \"timeSpentSeconds\": 47315,\n  \"answers\": \"\",\n  \"strongTopics\": [\n    \"string\",\n    \"string\"\n  ],\n  \"weakTopics\": [\n    \"string\",\n    \"string\"\n  ],\n  \"attemptedAt\": \"1962-11-27T03:29:44.395Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/exam-attempts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "exam-attempts"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "id": "76225e49-dbb5-4ba4-b610-367554c05571",
+                  "name": "Exam attempt stored.",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"childId\": \"88703273-19bd-7546-c2ef-d2a9a8026133\",\n  \"subject\": \"Hindi\",\n  \"difficulty\": \"Medium\",\n  \"questionCount\": 16,\n  \"correctAnswers\": 36,\n  \"examId\": \"string\",\n  \"grade\": \"Grade 1\",\n  \"totalMarks\": 787,\n  \"earnedMarks\": 819,\n  \"scorePercentage\": 69.13669370492809,\n  \"timeSpentSeconds\": 47315,\n  \"answers\": \"\",\n  \"strongTopics\": [\n    \"string\",\n    \"string\"\n  ],\n  \"weakTopics\": [\n    \"string\",\n    \"string\"\n  ],\n  \"attemptedAt\": \"1962-11-27T03:29:44.395Z\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/exam-attempts",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "exam-attempts"
+                      ]
+                    }
+                  },
+                  "status": "Created",
+                  "code": 201,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"86487d65-e649-ddab-2f9e-df07e43f5748\",\n    \"userId\": \"44639e1a-57a4-3232-fa0f-73574eef2323\",\n    \"childId\": \"7868e7f1-421a-d535-f611-3dbe4c372d55\",\n    \"grade\": \"LKG\",\n    \"subject\": \"Hindi\",\n    \"difficulty\": \"Easy\",\n    \"questionCount\": 5239,\n    \"correctAnswers\": 4489,\n    \"scorePercentage\": 4482.435440232774,\n    \"strongTopics\": [\n      \"string\",\n      \"string\"\n    ],\n    \"weakTopics\": [\n      \"string\",\n      \"string\"\n    ],\n    \"attemptedAt\": \"1955-12-10T14:19:02.131Z\",\n    \"createdAt\": \"2003-01-25T22:45:34.680Z\",\n    \"updatedAt\": \"2010-08-12T11:16:45.805Z\",\n    \"examId\": null,\n    \"totalMarks\": null,\n    \"earnedMarks\": 6791,\n    \"timeSpentSeconds\": null,\n    \"answers\": \"\"\n  }\n}"
+                },
+                {
+                  "id": "a8aaba91-42bf-4662-9ee6-903a4e773fc4",
+                  "name": "Request validation failed.",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"childId\": \"88703273-19bd-7546-c2ef-d2a9a8026133\",\n  \"subject\": \"Hindi\",\n  \"difficulty\": \"Medium\",\n  \"questionCount\": 16,\n  \"correctAnswers\": 36,\n  \"examId\": \"string\",\n  \"grade\": \"Grade 1\",\n  \"totalMarks\": 787,\n  \"earnedMarks\": 819,\n  \"scorePercentage\": 69.13669370492809,\n  \"timeSpentSeconds\": 47315,\n  \"answers\": \"\",\n  \"strongTopics\": [\n    \"string\",\n    \"string\"\n  ],\n  \"weakTopics\": [\n    \"string\",\n    \"string\"\n  ],\n  \"attemptedAt\": \"1962-11-27T03:29:44.395Z\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/exam-attempts",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "exam-attempts"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Validation failed\",\n    \"details\": {\n      \"body\": {\n        \"email\": [\n          \"Invalid email\"\n        ]\n      }\n    }\n  }\n}"
+                },
+                {
+                  "id": "327ad9c5-ae61-4038-aa86-73736286d409",
+                  "name": "Missing, invalid, or expired access token.",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"childId\": \"88703273-19bd-7546-c2ef-d2a9a8026133\",\n  \"subject\": \"Hindi\",\n  \"difficulty\": \"Medium\",\n  \"questionCount\": 16,\n  \"correctAnswers\": 36,\n  \"examId\": \"string\",\n  \"grade\": \"Grade 1\",\n  \"totalMarks\": 787,\n  \"earnedMarks\": 819,\n  \"scorePercentage\": 69.13669370492809,\n  \"timeSpentSeconds\": 47315,\n  \"answers\": \"\",\n  \"strongTopics\": [\n    \"string\",\n    \"string\"\n  ],\n  \"weakTopics\": [\n    \"string\",\n    \"string\"\n  ],\n  \"attemptedAt\": \"1962-11-27T03:29:44.395Z\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/exam-attempts",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "exam-attempts"
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                },
+                {
+                  "id": "14a8d7c7-e911-4105-a86b-d2e396020cf5",
+                  "name": "Requested resource was not found for the authenticated user.",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"childId\": \"88703273-19bd-7546-c2ef-d2a9a8026133\",\n  \"subject\": \"Hindi\",\n  \"difficulty\": \"Medium\",\n  \"questionCount\": 16,\n  \"correctAnswers\": 36,\n  \"examId\": \"string\",\n  \"grade\": \"Grade 1\",\n  \"totalMarks\": 787,\n  \"earnedMarks\": 819,\n  \"scorePercentage\": 69.13669370492809,\n  \"timeSpentSeconds\": 47315,\n  \"answers\": \"\",\n  \"strongTopics\": [\n    \"string\",\n    \"string\"\n  ],\n  \"weakTopics\": [\n    \"string\",\n    \"string\"\n  ],\n  \"attemptedAt\": \"1962-11-27T03:29:44.395Z\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/exam-attempts",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "exam-attempts"
+                      ]
+                    }
+                  },
+                  "status": "Not Found",
+                  "code": 404,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Child profile not found\"\n  }\n}"
+                }
+              ]
+            }
+          ],
+          "id": "37811170-cfe2-49db-9ef7-f5d9420ade41"
+        },
+        {
+          "name": "performance",
+          "item": [
+            {
+              "name": "children",
+              "item": [
+                {
+                  "name": "{childId}",
+                  "item": [
+                    {
+                      "name": "Get a child performance summary",
+                      "id": "dbda3375-70f6-438f-8355-c175351311f2",
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      },
+                      "request": {
+                        "auth": {
+                          "type": "bearer",
+                          "bearer": [
+                            {
+                              "key": "token",
+                              "value": "{{bearerToken}}",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/performance/children/:childId",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "performance",
+                            "children",
+                            ":childId"
+                          ],
+                          "variable": [
+                            {
+                              "key": "childId",
+                              "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "id": "3abba9b9-a2ed-485b-9844-fbcf5e68eb76",
+                          "name": "Computed performance summary for the child.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/performance/children/:childId",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "performance",
+                                "children",
+                                ":childId"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "childId",
+                                  "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"child\": {\n      \"id\": \"70f64d8a-9c98-9290-51f6-ac5481a2a19b\",\n      \"name\": \"string\",\n      \"age\": 9851,\n      \"grade\": \"Nursery\"\n    },\n    \"period\": \"current_month\",\n    \"summary\": {\n      \"totalExams\": 435,\n      \"averageScore\": 62.04632174553646,\n      \"bestScore\": 0.6826328183406671,\n      \"totalQuestions\": 5247,\n      \"correctAnswers\": 2554,\n      \"subjects\": [\n        {\n          \"subject\": \"English\",\n          \"averageScore\": 33.22375541454343,\n          \"totalExams\": 1640,\n          \"strongTopics\": [\n            \"string\",\n            \"string\"\n          ],\n          \"weakTopics\": [\n            \"string\",\n            \"string\"\n          ]\n        },\n        {\n          \"subject\": \"Maths\",\n          \"averageScore\": 42.21379538504024,\n          \"totalExams\": 8746,\n          \"strongTopics\": [\n            \"string\",\n            \"string\"\n          ],\n          \"weakTopics\": [\n            \"string\",\n            \"string\"\n          ]\n        }\n      ],\n      \"recentTrend\": [\n        {\n          \"subject\": \"EVS\",\n          \"percentage\": 49.874462655762144,\n          \"attemptedAt\": \"1946-12-10T05:53:36.839Z\"\n        },\n        {\n          \"subject\": \"GK\",\n          \"percentage\": 96.45109001204194,\n          \"attemptedAt\": \"1959-08-27T14:13:24.125Z\"\n        }\n      ]\n    }\n  }\n}"
+                        },
+                        {
+                          "id": "f287f88c-4993-4411-9b03-40ed73e308a5",
+                          "name": "Missing, invalid, or expired access token.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/performance/children/:childId",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "performance",
+                                "children",
+                                ":childId"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "childId",
+                                  "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                        },
+                        {
+                          "id": "a5d8ae3c-027c-4c76-97dc-66a32ef79eb7",
+                          "name": "Requested resource was not found for the authenticated user.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/performance/children/:childId",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "performance",
+                                "children",
+                                ":childId"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "childId",
+                                  "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Not Found",
+                          "code": 404,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Child profile not found\"\n  }\n}"
+                        }
+                      ]
+                    }
+                  ],
+                  "id": "4c9e64c0-09dd-48f8-bdb9-e8c7d2259ecc"
+                }
+              ],
+              "id": "b39b535f-4c87-4e12-8c62-343807518f2d"
+            }
+          ],
+          "id": "50d6bade-a63a-4835-bd03-50e9f8e21212"
+        },
+        {
+          "name": "analytics",
+          "item": [
+            {
+              "name": "generate",
+              "item": [
+                {
+                  "name": "Generate an AI learning insight",
+                  "id": "2ae61062-1c88-4ff2-bbd0-bfcc581ad002",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{bearerToken}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"childId\": \"98525277-d560-8ab4-5a80-288a60b3639d\",\n  \"period\": \"last_30_days\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/analytics/generate",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "analytics",
+                        "generate"
+                      ]
+                    },
+                    "description": "Generates and stores a parent-friendly insight from the selected child's synced exam attempts.\n"
+                  },
+                  "response": [
+                    {
+                      "id": "1717ae2a-c033-4ff7-a1dd-a2ae55efdd27",
+                      "name": "Generated learning insight.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"childId\": \"98525277-d560-8ab4-5a80-288a60b3639d\",\n  \"period\": \"last_30_days\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/analytics/generate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "analytics",
+                            "generate"
+                          ]
+                        }
+                      },
+                      "status": "Created",
+                      "code": 201,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"de29a0f0-b83a-6675-3526-c875ffa38208\",\n    \"userId\": \"5e5407b5-9467-4aab-8372-8fcf2e6c3939\",\n    \"childId\": \"6810ad15-0c57-e47a-5cf3-abc45492d892\",\n    \"period\": \"string\",\n    \"summary\": \"string\",\n    \"strengths\": [\n      \"string\",\n      \"string\"\n    ],\n    \"needsPractice\": [\n      \"string\",\n      \"string\"\n    ],\n    \"recommendations\": [\n      \"string\",\n      \"string\"\n    ],\n    \"suggestedDifficulty\": \"Easy\",\n    \"createdAt\": \"1990-04-27T21:25:58.328Z\",\n    \"usage\": {\n      \"tokensUsed\": 8509,\n      \"remainingTokens\": 729,\n      \"monthlyLimit\": 2903\n    },\n    \"metadata\": \"\"\n  }\n}"
+                    },
+                    {
+                      "id": "a8785d6c-f07c-402b-a593-e8efb852b686",
+                      "name": "Request validation failed.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"childId\": \"98525277-d560-8ab4-5a80-288a60b3639d\",\n  \"period\": \"last_30_days\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/analytics/generate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "analytics",
+                            "generate"
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Validation failed\",\n    \"details\": {\n      \"body\": {\n        \"email\": [\n          \"Invalid email\"\n        ]\n      }\n    }\n  }\n}"
+                    },
+                    {
+                      "id": "fcf996ff-c699-4676-8ce5-89861e03a1fe",
+                      "name": "Missing, invalid, or expired access token.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"childId\": \"98525277-d560-8ab4-5a80-288a60b3639d\",\n  \"period\": \"last_30_days\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/analytics/generate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "analytics",
+                            "generate"
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                    },
+                    {
+                      "id": "175e7deb-9629-4dca-86c8-47b486ec97d3",
+                      "name": "quotaReached",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"childId\": \"98525277-d560-8ab4-5a80-288a60b3639d\",\n  \"period\": \"last_30_days\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/analytics/generate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "analytics",
+                            "generate"
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Monthly AI usage limit reached.\"\n  }\n}"
+                    },
+                    {
+                      "id": "4f025edd-1a94-4b27-95b3-83f5f750795b",
+                      "name": "tooManyRequests",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"childId\": \"98525277-d560-8ab4-5a80-288a60b3639d\",\n  \"period\": \"last_30_days\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/analytics/generate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "analytics",
+                            "generate"
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Too many requests, please try again later\"\n  }\n}"
+                    },
+                    {
+                      "id": "bf001491-b367-450a-b495-86a08a123b82",
+                      "name": "AI provider returned invalid output.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"childId\": \"98525277-d560-8ab4-5a80-288a60b3639d\",\n  \"period\": \"last_30_days\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/analytics/generate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "analytics",
+                            "generate"
+                          ]
+                        }
+                      },
+                      "status": "Bad Gateway",
+                      "code": 502,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"string\",\n    \"details\": \"\"\n  }\n}"
+                    }
+                  ]
+                }
+              ],
+              "id": "2a3aa552-2371-4351-9723-0b4868e1b1e0"
+            },
+            {
+              "name": "children",
+              "item": [
+                {
+                  "name": "{childId}",
+                  "item": [
+                    {
+                      "name": "List AI insights for a child",
+                      "id": "f1548d79-db35-463e-af22-9ce3c945b455",
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      },
+                      "request": {
+                        "auth": {
+                          "type": "bearer",
+                          "bearer": [
+                            {
+                              "key": "token",
+                              "value": "{{bearerToken}}",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/analytics/children/:childId",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "analytics",
+                            "children",
+                            ":childId"
+                          ],
+                          "variable": [
+                            {
+                              "key": "childId",
+                              "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "id": "c056a567-a1c3-4135-a6e4-bacb011b4080",
+                          "name": "AI insight history for the child.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/analytics/children/:childId",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "analytics",
+                                "children",
+                                ":childId"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "childId",
+                                  "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"cc18bb97-04e1-da7b-7b49-5b181e3f9ab3\",\n      \"userId\": \"e5d16a21-f1e1-7216-d64c-01839aa309ba\",\n      \"childId\": \"7b4047c7-c61e-78ae-100c-88f54e3271cc\",\n      \"period\": \"string\",\n      \"summary\": \"string\",\n      \"strengths\": [\n        \"string\",\n        \"string\"\n      ],\n      \"needsPractice\": [\n        \"string\",\n        \"string\"\n      ],\n      \"recommendations\": [\n        \"string\",\n        \"string\"\n      ],\n      \"suggestedDifficulty\": \"Easy\",\n      \"createdAt\": \"1968-07-17T04:33:39.760Z\",\n      \"metadata\": \"\"\n    },\n    {\n      \"id\": \"8c56eb8c-716b-2729-38c9-4f7b534596db\",\n      \"userId\": \"69a86218-cc72-58c5-7db5-6e3ceb99c7f3\",\n      \"childId\": \"97c5db68-508d-47b9-f4da-11c36e45a8c2\",\n      \"period\": \"string\",\n      \"summary\": \"string\",\n      \"strengths\": [\n        \"string\",\n        \"string\"\n      ],\n      \"needsPractice\": [\n        \"string\",\n        \"string\"\n      ],\n      \"recommendations\": [\n        \"string\",\n        \"string\"\n      ],\n      \"suggestedDifficulty\": \"Easy\",\n      \"createdAt\": \"2024-06-01T20:04:47.613Z\",\n      \"metadata\": \"\"\n    }\n  ]\n}"
+                        },
+                        {
+                          "id": "3bbf2baa-8cd9-4923-959e-dfaf430b908c",
+                          "name": "Missing, invalid, or expired access token.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/analytics/children/:childId",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "analytics",
+                                "children",
+                                ":childId"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "childId",
+                                  "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                        },
+                        {
+                          "id": "daa115b6-748f-47ac-94fd-df1c708c7855",
+                          "name": "Requested resource was not found for the authenticated user.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/analytics/children/:childId",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "analytics",
+                                "children",
+                                ":childId"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "childId",
+                                  "value": "802a6d85-86b6-ca28-2940-221245bb7f19"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Not Found",
+                          "code": 404,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Child profile not found\"\n  }\n}"
+                        }
+                      ]
+                    }
+                  ],
+                  "id": "9f12434b-c2fa-483c-972a-b5972287d499"
+                }
+              ],
+              "id": "4155b227-46ac-4ef4-8a7d-f127602186a3"
+            }
+          ],
+          "id": "5965f1f7-33a3-47ed-b360-368a2a672d60"
+        },
+        {
+          "name": "usage",
+          "item": [
+            {
+              "name": "me",
+              "item": [
+                {
+                  "name": "Get current monthly AI usage",
+                  "id": "7513aad3-2c8f-4ad2-a036-32b77995f030",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{bearerToken}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/usage/me",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "usage",
+                        "me"
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "id": "141bc8a1-30bc-4b2f-b757-8525bc285cdb",
+                      "name": "Monthly usage status.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/usage/me",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "usage",
+                            "me"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"data\": {\n    \"plan\": \"FREE\",\n    \"monthlyLimit\": 10000,\n    \"tokensUsed\": 2300,\n    \"remainingTokens\": 7700,\n    \"periodStart\": \"1959-09-07T03:56:44.035Z\",\n    \"periodEnd\": \"1953-04-02T23:56:16.310Z\"\n  }\n}"
+                    },
+                    {
+                      "id": "4a5166c9-34cc-4621-8ecc-ee27fd022bcd",
+                      "name": "Missing, invalid, or expired access token.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/usage/me",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "usage",
+                            "me"
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Authentication required\"\n  }\n}"
+                    },
+                    {
+                      "id": "99ae5062-d510-4806-beb9-49beaeb1852c",
+                      "name": "Too many requests.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/usage/me",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "usage",
+                            "me"
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"success\": false,\n  \"error\": {\n    \"message\": \"Too many requests, please try again later\"\n  }\n}"
+                    }
+                  ]
+                }
+              ],
+              "id": "5d9f9100-6973-4797-bc80-8e1b227d9d17"
+            }
+          ],
+          "id": "5c473a2a-0a09-409f-bd1a-6fbfd8b15b61"
+        }
+      ],
+      "id": "2a3d7c0e-850a-462c-bf03-162badde8907"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "id": "0f53bf63-2851-4022-b66d-f272cbf27668",
+      "key": "baseUrl",
+      "value": "/"
+    }
+  ]
+}

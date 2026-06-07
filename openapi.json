@@ -319,6 +319,7 @@
               "examples": {
                 "default": {
                   "value": {
+                    "childId": "7d4f731e-91d5-40c2-96bf-b78c02b35d13",
                     "grade": "UKG",
                     "subject": "Maths",
                     "difficulty": "Easy",
@@ -343,6 +344,7 @@
                       "success": true,
                       "data": {
                         "examId": "3791cf6e-8f01-46d1-ae47-6c95f9f8935a",
+                        "childId": "7d4f731e-91d5-40c2-96bf-b78c02b35d13",
                         "grade": "UKG",
                         "subject": "Maths",
                         "difficulty": "Easy",
@@ -1229,14 +1231,19 @@
       "GenerateExamRequest": {
         "type": "object",
         "required": [
-          "grade",
           "subject",
           "difficulty",
           "questionCount"
         ],
         "properties": {
+          "childId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Child profile to generate the exam for. When provided, the stored child profile is the source of truth."
+          },
           "grade": {
-            "$ref": "#/components/schemas/Grade"
+            "$ref": "#/components/schemas/Grade",
+            "description": "Must match the child profile grade when childId is provided. Used as a legacy fallback when childId is not provided."
           },
           "subject": {
             "$ref": "#/components/schemas/Subject"
@@ -1353,6 +1360,11 @@
           "examId": {
             "type": "string",
             "format": "uuid"
+          },
+          "childId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Present when the exam was generated for a selected child."
           },
           "grade": {
             "$ref": "#/components/schemas/Grade"
