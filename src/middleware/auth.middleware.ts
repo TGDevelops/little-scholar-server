@@ -15,12 +15,20 @@ export const authenticate = async (
       throw new AppError('Authentication required', 401);
     }
 
-    const token = authHeader.slice('Bearer '.length);
+    const token = authHeader.slice('Bearer '.length).replace(/^Bearer\s+/i, '').trim();
     const payload = verifyAccessToken(token);
 
     const user = await prisma.user.findUnique({
       where: { id: payload.sub },
-      select: { id: true, name: true, email: true, city: true, createdAt: true, updatedAt: true }
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        city: true,
+        plan: true,
+        createdAt: true,
+        updatedAt: true
+      }
     });
 
     if (!user) {

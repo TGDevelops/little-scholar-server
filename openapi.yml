@@ -4,13 +4,16 @@ info:
   version: 1.0.0
   description: >
     API specification for the Little Scholar backend. The service provides
-    health checks, parent authentication, user profile details, and AI exam
-    generation for the Little Scholar iOS app.
+    health checks, parent authentication, child profiles, AI exam generation,
+    synced exam attempts, performance summaries, usage quotas, and AI learning
+    insights for the Little Scholar iOS app.
 servers:
   - url: /
     description: Same origin as the Swagger UI
-  - url: https://little-scholar-server-production.up.railway.app
+  - url: https://your-railway-domain.up.railway.app
     description: Railway deployment
+security:
+  - bearerAuth: []
 tags:
   - name: Health
     description: Service status endpoints.
@@ -18,6 +21,16 @@ tags:
     description: Parent registration, login, and current-user endpoints.
   - name: Exams
     description: AI exam generation endpoints.
+  - name: Children
+    description: Child profile cloud sync endpoints.
+  - name: Exam Attempts
+    description: Exam attempt cloud sync endpoints.
+  - name: Performance
+    description: Computed child performance summaries.
+  - name: Analytics
+    description: AI insight generation and history from synced learning data.
+  - name: Usage
+    description: Monthly AI usage status endpoints.
 paths:
   /api/health:
     get:
@@ -79,6 +92,7 @@ paths:
                         name: Tejesh Gangari
                         email: parent@example.com
                         city: Hyderabad
+                        plan: FREE
                         createdAt: '2026-05-28T00:00:00.000Z'
                         updatedAt: '2026-05-28T00:00:00.000Z'
                       accessToken: jwt-token
@@ -134,6 +148,7 @@ paths:
                         name: Tejesh Gangari
                         email: parent@example.com
                         city: Hyderabad
+                        plan: FREE
                         createdAt: '2026-05-28T00:00:00.000Z'
                         updatedAt: '2026-05-28T00:00:00.000Z'
                       accessToken: jwt-token
@@ -168,6 +183,7 @@ paths:
                         name: Tejesh Gangari
                         email: parent@example.com
                         city: Hyderabad
+                        plan: FREE
                         createdAt: '2026-05-28T00:00:00.000Z'
                         updatedAt: '2026-05-28T00:00:00.000Z'
         '401':
@@ -229,12 +245,16 @@ paths:
                           explanation: 6 comes after 5.
                           topic: Number sequence
                           marks: 1
+                      usage:
+                        tokensUsed: 900
+                        remainingTokens: 9100
+                        monthlyLimit: 10000
         '400':
           $ref: '#/components/responses/ValidationError'
         '401':
           $ref: '#/components/responses/AuthError'
         '429':
-          $ref: '#/components/responses/RateLimitError'
+          $ref: '#/components/responses/QuotaOrRateLimitError'
         '502':
           description: AI provider returned invalid or contract-breaking output.
           content:
@@ -247,12 +267,256 @@ paths:
                     success: false
                     error:
                       message: Gemini provider request failed
+  /api/children:
+    post:
+      tags:
+        - Children
+      operationId: createChild
+      summary: Create a child profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChildProfileRequest'
+      responses:
+        '201':
+          description: Child profile created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildProfileResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/AuthError'
+    get:
+      tags:
+        - Children
+      operationId: listChildren
+      summary: List child profiles
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Child profiles for the authenticated parent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildProfileListResponse'
+        '401':
+          $ref: '#/components/responses/AuthError'
+  /api/children/{childId}:
+    put:
+      tags:
+        - Children
+      operationId: updateChild
+      summary: Update a child profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ChildId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChildProfileUpdateRequest'
+      responses:
+        '200':
+          description: Child profile updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildProfileResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      tags:
+        - Children
+      operationId: deleteChild
+      summary: Delete a child profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ChildId'
+      responses:
+        '200':
+          description: Child profile deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /api/exam-attempts:
+    post:
+      tags:
+        - Exam Attempts
+      operationId: createExamAttempt
+      summary: Sync an exam attempt
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExamAttemptRequest'
+      responses:
+        '201':
+          description: Exam attempt stored.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExamAttemptResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /api/exam-attempts/children/{childId}:
+    get:
+      tags:
+        - Exam Attempts
+      operationId: listExamAttemptsForChild
+      summary: List synced attempts for a child
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ChildId'
+      responses:
+        '200':
+          description: Synced attempts for the child.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExamAttemptListResponse'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /api/performance/children/{childId}:
+    get:
+      tags:
+        - Performance
+      operationId: getChildPerformance
+      summary: Get a child performance summary
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ChildId'
+      responses:
+        '200':
+          description: Computed performance summary for the child.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerformanceSummaryResponse'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /api/analytics/generate:
+    post:
+      tags:
+        - Analytics
+      operationId: generateAnalyticsInsight
+      summary: Generate an AI learning insight
+      description: >
+        Generates and stores a parent-friendly insight from the selected child's
+        synced exam attempts.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateAnalyticsInsightRequest'
+      responses:
+        '201':
+          description: Generated learning insight.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateAnalyticsInsightResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '429':
+          $ref: '#/components/responses/QuotaOrRateLimitError'
+        '502':
+          description: AI provider returned invalid output.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/analytics/children/{childId}:
+    get:
+      tags:
+        - Analytics
+      operationId: listAnalyticsInsightsForChild
+      summary: List AI insights for a child
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ChildId'
+      responses:
+        '200':
+          description: AI insight history for the child.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsInsightListResponse'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /api/usage/me:
+    get:
+      tags:
+        - Usage
+      operationId: getMyUsage
+      summary: Get current monthly AI usage
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Monthly usage status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageStatusResponse'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: Paste the JWT accessToken value only. Do not include the Bearer prefix.
+  parameters:
+    ChildId:
+      name: childId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
   responses:
     ValidationError:
       description: Request validation failed.
@@ -282,6 +546,18 @@ components:
                 success: false
                 error:
                   message: Authentication required
+    NotFoundError:
+      description: Requested resource was not found for the authenticated user.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            notFound:
+              value:
+                success: false
+                error:
+                  message: Child profile not found
     RateLimitError:
       description: Too many requests.
       content:
@@ -289,6 +565,23 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           examples:
+            tooManyRequests:
+              value:
+                success: false
+                error:
+                  message: Too many requests, please try again later
+    QuotaOrRateLimitError:
+      description: Monthly AI quota reached or too many requests.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            quotaReached:
+              value:
+                success: false
+                error:
+                  message: Monthly AI usage limit reached.
             tooManyRequests:
               value:
                 success: false
@@ -401,6 +694,7 @@ components:
         - name
         - email
         - city
+        - plan
         - createdAt
         - updatedAt
       properties:
@@ -417,6 +711,12 @@ components:
         city:
           type: string
           example: Hyderabad
+        plan:
+          type: string
+          enum:
+            - FREE
+            - PREMIUM
+          example: FREE
         createdAt:
           type: string
           format: date-time
@@ -459,6 +759,7 @@ components:
     Grade:
       type: string
       enum:
+        - Nursery
         - LKG
         - UKG
         - Grade 1
@@ -572,6 +873,7 @@ components:
         - difficulty
         - questionCount
         - questions
+        - usage
       properties:
         examId:
           type: string
@@ -590,6 +892,25 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ExamQuestion'
+        usage:
+          $ref: '#/components/schemas/AIUsage'
+      additionalProperties: false
+    AIUsage:
+      type: object
+      required:
+        - tokensUsed
+        - remainingTokens
+        - monthlyLimit
+      properties:
+        tokensUsed:
+          type: integer
+          minimum: 0
+        remainingTokens:
+          type: integer
+          minimum: 0
+        monthlyLimit:
+          type: integer
+          minimum: 0
       additionalProperties: false
     GenerateExamResponse:
       allOf:
@@ -598,3 +919,528 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ExamPaper'
+    ChildProfileRequest:
+      type: object
+      required:
+        - name
+        - age
+        - grade
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+          example: Aarav
+        age:
+          type: integer
+          minimum: 2
+          maximum: 10
+          example: 6
+        grade:
+          $ref: '#/components/schemas/Grade'
+        avatarUrl:
+          type:
+            - string
+            - 'null'
+          format: uri
+          maxLength: 500
+      additionalProperties: false
+    ChildProfileUpdateRequest:
+      type: object
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        age:
+          type: integer
+          minimum: 2
+          maximum: 10
+        grade:
+          $ref: '#/components/schemas/Grade'
+        avatarUrl:
+          type:
+            - string
+            - 'null'
+          format: uri
+          maxLength: 500
+      additionalProperties: false
+    ChildProfile:
+      type: object
+      required:
+        - id
+        - userId
+        - name
+        - age
+        - grade
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        age:
+          type: integer
+        grade:
+          $ref: '#/components/schemas/Grade'
+        avatarUrl:
+          type:
+            - string
+            - 'null'
+          format: uri
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    ChildProfileResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ChildProfile'
+    ChildProfileListResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChildProfile'
+    DeleteResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - deleted
+              properties:
+                deleted:
+                  type: boolean
+                  const: true
+              additionalProperties: false
+    CreateExamAttemptRequest:
+      type: object
+      required:
+        - childId
+        - subject
+        - difficulty
+        - questionCount
+        - correctAnswers
+      properties:
+        childId:
+          type: string
+          format: uuid
+        examId:
+          type: string
+          maxLength: 120
+        grade:
+          $ref: '#/components/schemas/Grade'
+        subject:
+          $ref: '#/components/schemas/Subject'
+        difficulty:
+          $ref: '#/components/schemas/Difficulty'
+        questionCount:
+          type: integer
+          minimum: 1
+          maximum: 200
+        correctAnswers:
+          type: integer
+          minimum: 0
+          maximum: 200
+        totalMarks:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        earnedMarks:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        scorePercentage:
+          type: number
+          minimum: 0
+          maximum: 100
+        timeSpentSeconds:
+          type: integer
+          minimum: 0
+          maximum: 86400
+        answers:
+          description: Optional client answer details.
+        strongTopics:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+        weakTopics:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+        attemptedAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    ExamAttempt:
+      type: object
+      required:
+        - id
+        - userId
+        - childId
+        - grade
+        - subject
+        - difficulty
+        - questionCount
+        - correctAnswers
+        - scorePercentage
+        - strongTopics
+        - weakTopics
+        - attemptedAt
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        childId:
+          type: string
+          format: uuid
+        examId:
+          type:
+            - string
+            - 'null'
+        grade:
+          $ref: '#/components/schemas/Grade'
+        subject:
+          $ref: '#/components/schemas/Subject'
+        difficulty:
+          $ref: '#/components/schemas/Difficulty'
+        questionCount:
+          type: integer
+        correctAnswers:
+          type: integer
+        totalMarks:
+          type:
+            - integer
+            - 'null'
+        earnedMarks:
+          type:
+            - integer
+            - 'null'
+        scorePercentage:
+          type: number
+        timeSpentSeconds:
+          type:
+            - integer
+            - 'null'
+        answers:
+          nullable: true
+        strongTopics:
+          type: array
+          items:
+            type: string
+        weakTopics:
+          type: array
+          items:
+            type: string
+        attemptedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    ExamAttemptResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ExamAttempt'
+    ExamAttemptListResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExamAttempt'
+    AnalyticsChildSummary:
+      type: object
+      required:
+        - age
+        - grade
+      properties:
+        age:
+          type: integer
+          minimum: 2
+          maximum: 10
+        grade:
+          $ref: '#/components/schemas/Grade'
+      additionalProperties: false
+    AnalyticsSubjectSummary:
+      type: object
+      required:
+        - subject
+        - averageScore
+        - totalExams
+        - strongTopics
+        - weakTopics
+      properties:
+        subject:
+          $ref: '#/components/schemas/Subject'
+        averageScore:
+          type: number
+          minimum: 0
+          maximum: 100
+        totalExams:
+          type: integer
+          minimum: 0
+        strongTopics:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+        weakTopics:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+      additionalProperties: false
+    AnalyticsTrendEntry:
+      type: object
+      required:
+        - subject
+        - percentage
+        - attemptedAt
+      properties:
+        subject:
+          $ref: '#/components/schemas/Subject'
+        percentage:
+          type: number
+          minimum: 0
+          maximum: 100
+        attemptedAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    PerformanceSummary:
+      type: object
+      required:
+        - child
+        - period
+        - summary
+      properties:
+        child:
+          type: object
+          required:
+            - id
+            - name
+            - age
+            - grade
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+            age:
+              type: integer
+            grade:
+              $ref: '#/components/schemas/Grade'
+          additionalProperties: false
+        period:
+          type: string
+          enum:
+            - all_time
+            - current_month
+            - last_30_days
+        summary:
+          type: object
+          required:
+            - totalExams
+            - averageScore
+            - bestScore
+            - totalQuestions
+            - correctAnswers
+            - subjects
+            - recentTrend
+          properties:
+            totalExams:
+              type: integer
+              minimum: 0
+            averageScore:
+              type: number
+              minimum: 0
+              maximum: 100
+            bestScore:
+              type: number
+              minimum: 0
+              maximum: 100
+            totalQuestions:
+              type: integer
+              minimum: 0
+            correctAnswers:
+              type: integer
+              minimum: 0
+            subjects:
+              type: array
+              items:
+                $ref: '#/components/schemas/AnalyticsSubjectSummary'
+            recentTrend:
+              type: array
+              items:
+                $ref: '#/components/schemas/AnalyticsTrendEntry'
+          additionalProperties: false
+      additionalProperties: false
+    PerformanceSummaryResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/PerformanceSummary'
+    GenerateAnalyticsInsightRequest:
+      type: object
+      required:
+        - childId
+      properties:
+        childId:
+          type: string
+          format: uuid
+        period:
+          type: string
+          enum:
+            - all_time
+            - current_month
+            - last_30_days
+          default: last_30_days
+      additionalProperties: false
+    AnalyticsInsight:
+      type: object
+      required:
+        - id
+        - userId
+        - childId
+        - period
+        - summary
+        - strengths
+        - needsPractice
+        - recommendations
+        - suggestedDifficulty
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        childId:
+          type: string
+          format: uuid
+        period:
+          type: string
+        summary:
+          type: string
+        strengths:
+          type: array
+          items:
+            type: string
+        needsPractice:
+          type: array
+          items:
+            type: string
+        recommendations:
+          type: array
+          items:
+            type: string
+        suggestedDifficulty:
+          $ref: '#/components/schemas/Difficulty'
+        metadata:
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    GeneratedAnalyticsInsight:
+      allOf:
+        - $ref: '#/components/schemas/AnalyticsInsight'
+        - type: object
+          required:
+            - usage
+          properties:
+            usage:
+              $ref: '#/components/schemas/AIUsage'
+    GenerateAnalyticsInsightResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/GeneratedAnalyticsInsight'
+    AnalyticsInsightListResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/AnalyticsInsight'
+    UsageStatus:
+      type: object
+      required:
+        - plan
+        - monthlyLimit
+        - tokensUsed
+        - remainingTokens
+        - periodStart
+        - periodEnd
+      properties:
+        plan:
+          type: string
+          enum:
+            - FREE
+            - PREMIUM
+        monthlyLimit:
+          type: integer
+          example: 10000
+        tokensUsed:
+          type: integer
+          example: 2300
+        remainingTokens:
+          type: integer
+          example: 7700
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+      additionalProperties: false
+    UsageStatusResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UsageStatus'

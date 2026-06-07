@@ -25,3 +25,16 @@ export const authRateLimiter = rateLimit({
     }
   }
 });
+
+export const analyticsRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: {
+      message: 'Too many AI insight requests, please try again later'
+    }
+  }
+});
