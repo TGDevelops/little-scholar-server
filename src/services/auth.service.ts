@@ -11,6 +11,7 @@ const publicUserSelect = {
   name: true,
   email: true,
   city: true,
+  plan: true,
   createdAt: true,
   updatedAt: true
 } as const;
@@ -66,6 +67,7 @@ export const authService = {
         name: user.name,
         email: user.email,
         city: user.city,
+        plan: user.plan,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       },

@@ -258,6 +258,7 @@ Response:
       "name": "Tejesh Gangari",
       "email": "parent@example.com",
       "city": "Hyderabad",
+      "plan": "FREE",
       "createdAt": "2026-05-28T00:00:00.000Z",
       "updatedAt": "2026-05-28T00:00:00.000Z"
     },
@@ -302,6 +303,7 @@ Response:
       "name": "Tejesh Gangari",
       "email": "parent@example.com",
       "city": "Hyderabad",
+      "plan": "FREE",
       "createdAt": "2026-05-28T00:00:00.000Z",
       "updatedAt": "2026-05-28T00:00:00.000Z"
     }
@@ -332,7 +334,7 @@ Request:
 
 Supported values:
 
-- Grades: `LKG`, `UKG`, `Grade 1`
+- Grades: `Nursery`, `LKG`, `UKG`, `Grade 1`
 - Subjects: `English`, `Maths`, `Hindi`, `EVS`, `GK`
 - Difficulty: `Easy`, `Medium`, `Hard`
 - Question types: `mcq`, `true_false`, `fill_blank`, `match_following`
@@ -360,10 +362,112 @@ Response:
         "topic": "Number sequence",
         "marks": 1
       }
+    ],
+    "usage": {
+      "tokensUsed": 900,
+      "remainingTokens": 9100,
+      "monthlyLimit": 10000
+    }
+  }
+}
+```
+
+If the estimated request would exceed the user monthly quota, the API returns `429` with `Monthly AI usage limit reached.`.
+
+### Generate AI Insight
+
+`POST /api/analytics/generate`
+
+Headers:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+Request:
+
+```json
+{
+  "child": {
+    "age": 6,
+    "grade": "Grade 1"
+  },
+  "period": "all_time",
+  "summary": {
+    "totalExams": 8,
+    "averageScore": 76,
+    "bestScore": 90,
+    "subjects": [
+      {
+        "subject": "Maths",
+        "averageScore": 70,
+        "totalExams": 4,
+        "strongTopics": ["Counting", "Addition"],
+        "weakTopics": ["Subtraction", "Number sequence"]
+      }
+    ],
+    "recentTrend": [
+      {
+        "subject": "Maths",
+        "percentage": 60,
+        "attemptedAt": "2026-06-01T10:00:00Z"
+      }
     ]
   }
 }
 ```
+
+The analytics API accepts only summarized learning data. It rejects extra fields such as child name, city, full question text, and answer history, does not persist the payload, and logs only token usage metadata.
+
+Response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "insightId": "generated-uuid",
+    "summary": "Short parent-friendly learning summary.",
+    "strengths": ["Counting"],
+    "needsPractice": ["Subtraction"],
+    "recommendations": ["Generate more easy subtraction exams."],
+    "suggestedDifficulty": "Easy",
+    "generatedAt": "2026-06-06T10:00:00.000Z",
+    "usage": {
+      "tokensUsed": 850,
+      "remainingTokens": 4150,
+      "monthlyLimit": 10000
+    }
+  }
+}
+```
+
+### Usage Status
+
+`GET /api/usage/me`
+
+Headers:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "plan": "FREE",
+    "monthlyLimit": 10000,
+    "tokensUsed": 2300,
+    "remainingTokens": 7700,
+    "periodStart": "2026-06-01T00:00:00.000Z",
+    "periodEnd": "2026-06-30T23:59:59.999Z"
+  }
+}
+```
+
+Monthly AI limits are `10,000` tokens for `FREE` users and `100,000` tokens for `PREMIUM` users. Subscription verification is not active yet; `src/services/subscriptionService.ts` is a placeholder for StoreKit 2 and App Store Server API integration.
 
 The backend does not implement `/api/exams/evaluate` in the MVP. Generated questions include correct answers so the iOS app can evaluate attempts locally.
 
@@ -371,8 +475,9 @@ The backend does not implement `/api/exams/evaluate` in the MVP. Generated quest
 
 Models:
 
-- `User`: authentication account with name, unique email, city, and bcrypt hash
-- `UsageLog`: per-user AI usage tracking by provider, token count, and operation type
+- `User`: authentication account with name, unique email, city, bcrypt hash, and plan
+- `UsageLog`: per-user AI usage tracking by provider, operation type, input tokens, output tokens, and total token count
+- `Subscription`: placeholder subscription records for future premium entitlement verification
 
 Run migrations with:
 

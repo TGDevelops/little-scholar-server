@@ -1,6 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { AIProvider, GenerateExamResult } from './AIProvider';
+import type {
+  AIProvider,
+  GenerateAnalyticsInsightResult,
+  GenerateExamResult
+} from './AIProvider';
 import type { GenerateExamInput, GeneratedExam, GeneratedQuestion } from '../../validators/exam.validator';
+import type { GenerateAnalyticsInsightInput } from '../../validators/analytics.validator';
 
 export class MockProvider implements AIProvider {
   public readonly name = 'mock';
@@ -32,7 +37,33 @@ export class MockProvider implements AIProvider {
     return {
       exam,
       usage: {
-        tokensUsed: 0
+        tokensUsed: 100,
+        inputTokens: 50,
+        outputTokens: 50
+      }
+    };
+  }
+
+  async generateAnalyticsInsight(
+    input: GenerateAnalyticsInsightInput
+  ): Promise<GenerateAnalyticsInsightResult> {
+    const firstSubject = input.summary.subjects[0];
+
+    return {
+      insight: {
+        summary: 'Your child is making steady progress and is ready for gentle practice.',
+        strengths: firstSubject?.strongTopics.slice(0, 2) ?? ['Consistent practice'],
+        needsPractice: firstSubject?.weakTopics.slice(0, 2) ?? ['Mixed revision'],
+        recommendations: [
+          'Generate a short easy exam for the topic that needs practice.',
+          'Review one topic at a time before increasing difficulty.'
+        ],
+        suggestedDifficulty: input.summary.averageScore >= 80 ? 'Medium' : 'Easy'
+      },
+      usage: {
+        tokensUsed: 120,
+        inputTokens: 70,
+        outputTokens: 50
       }
     };
   }

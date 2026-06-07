@@ -8,28 +8,136 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum PlanType {
+  FREE
+  PREMIUM
+}
+
+enum OperationType {
+  EXAM_GENERATION
+  AI_INSIGHT_GENERATION
+}
+
+enum SubscriptionStatus {
+  NONE
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
 model User {
-  id           String     @id @default(uuid())
-  name         String     @default("")
-  email        String     @unique
-  city         String     @default("")
-  passwordHash String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  usageLogs    UsageLog[]
+  id            String         @id @default(uuid())
+  name          String         @default("")
+  email         String         @unique
+  city          String         @default("")
+  passwordHash  String
+  plan          PlanType       @default(FREE)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  children      ChildProfile[]
+  examAttempts  ExamAttempt[]
+  aiInsights    AIInsight[]
+  usageLogs     UsageLog[]
+  subscriptions Subscription[]
 
   @@map("users")
 }
 
-model UsageLog {
-  id            String   @id @default(uuid())
-  userId        String
-  provider      String
-  tokensUsed    Int      @default(0)
-  operationType String
-  createdAt     DateTime @default(now())
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+model ChildProfile {
+  id           String        @id @default(uuid())
+  userId       String
+  name         String
+  age          Int
+  grade        String
+  avatarUrl    String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  examAttempts ExamAttempt[]
+  aiInsights   AIInsight[]
 
   @@index([userId])
+  @@map("child_profiles")
+}
+
+model ExamAttempt {
+  id               String       @id @default(uuid())
+  userId           String
+  childId          String
+  examId           String?
+  grade            String
+  subject          String
+  difficulty       String
+  questionCount    Int
+  correctAnswers   Int
+  totalMarks       Int?
+  earnedMarks      Int?
+  scorePercentage  Float
+  timeSpentSeconds Int?
+  answers          Json?
+  strongTopics     String[]     @default([])
+  weakTopics       String[]     @default([])
+  attemptedAt      DateTime     @default(now())
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  child            ChildProfile @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([childId, attemptedAt])
+  @@map("exam_attempts")
+}
+
+model AIInsight {
+  id                  String       @id @default(uuid())
+  userId              String
+  childId             String
+  period              String
+  summary             String
+  strengths           String[]     @default([])
+  needsPractice       String[]     @default([])
+  recommendations     String[]     @default([])
+  suggestedDifficulty String
+  metadata            Json?
+  createdAt           DateTime     @default(now())
+  user                User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  child               ChildProfile @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([childId, createdAt])
+  @@map("ai_insights")
+}
+
+model UsageLog {
+  id            String        @id @default(uuid())
+  userId        String
+  provider      String
+  operationType OperationType
+  tokensUsed    Int           @default(0)
+  inputTokens   Int           @default(0)
+  outputTokens  Int           @default(0)
+  createdAt     DateTime      @default(now())
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, createdAt])
   @@map("usage_logs")
+}
+
+model Subscription {
+  id                    String             @id @default(uuid())
+  userId                String
+  provider              String
+  status                SubscriptionStatus @default(NONE)
+  productId             String?
+  originalTransactionId String?
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([originalTransactionId])
+  @@map("subscriptions")
 }

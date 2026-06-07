@@ -3,9 +3,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { env } from '../../config/env';
 import { configureGoogleApplicationCredentials } from '../../config/googleAuth';
 import { AppError } from '../../utils/AppError';
+import { usageService } from '../usage.service';
+import { buildAnalyticsInsightPrompt } from '../../prompts/analyticsInsightPrompt';
 import { buildExamGenerationPrompt } from '../../prompts/examGenerationPrompt';
 import { generatedExamSchema, type GenerateExamInput } from '../../validators/exam.validator';
-import type { AIProvider, GenerateExamResult } from './AIProvider';
+import {
+  generatedAnalyticsInsightSchema,
+  type GenerateAnalyticsInsightInput
+} from '../../validators/analytics.validator';
+import type { AIProvider, GenerateAnalyticsInsightResult, GenerateExamResult } from './AIProvider';
 
 export class GeminiProvider implements AIProvider {
   public readonly name = 'gemini';
@@ -39,7 +45,7 @@ export class GeminiProvider implements AIProvider {
   async generateExam(input: GenerateExamInput): Promise<GenerateExamResult> {
     const examId = uuidv4();
     const prompt = buildExamGenerationPrompt(input, examId);
-    const result = await this.generateContent(prompt);
+    const result = await this.generateContent(prompt, 1500);
     const rawText = result.text;
 
     if (!rawText) {
@@ -62,13 +68,34 @@ export class GeminiProvider implements AIProvider {
 
     return {
       exam,
-      usage: {
-        tokensUsed: this.getTokensUsed(result)
-      }
+      usage: this.getUsage(result, prompt, rawText)
     };
   }
 
-  private async generateContent(prompt: string): Promise<GenerateContentResponse> {
+  async generateAnalyticsInsight(
+    input: GenerateAnalyticsInsightInput
+  ): Promise<GenerateAnalyticsInsightResult> {
+    const prompt = buildAnalyticsInsightPrompt(input);
+    const result = await this.generateContent(prompt, 1000);
+    const rawText = result.text;
+
+    if (!rawText) {
+      throw new AppError('Gemini provider returned an empty response', 502);
+    }
+
+    const parsedJson = this.parseJson(rawText);
+    const insight = generatedAnalyticsInsightSchema.parse(parsedJson);
+
+    return {
+      insight,
+      usage: this.getUsage(result, prompt, rawText)
+    };
+  }
+
+  private async generateContent(
+    prompt: string,
+    maxOutputTokens: number
+  ): Promise<GenerateContentResponse> {
     try {
       if (this.useApiKey) {
         // Direct REST call to Generative Language API v1 using API key
@@ -85,7 +112,8 @@ export class GeminiProvider implements AIProvider {
           ],
           generationConfig: {
             temperature: 0.5,
-            maxOutputTokens: 1500
+            maxOutputTokens,
+            responseMimeType: 'application/json'
           }
         };
 
@@ -114,7 +142,7 @@ export class GeminiProvider implements AIProvider {
         // Normalize to expected shape from @google/genai
         return {
           text: output,
-          usageMetadata: { totalTokenCount: data?.usageMetadata?.totalTokenCount ?? 0 }
+          usageMetadata: data?.usageMetadata ?? {}
         } as unknown as GenerateContentResponse;
       }
 
@@ -127,7 +155,8 @@ export class GeminiProvider implements AIProvider {
         contents: prompt,
         config: {
           responseMimeType: 'application/json',
-          temperature: 0.5
+          temperature: 0.5,
+          maxOutputTokens
         }
       });
     } catch (error) {
@@ -174,7 +203,29 @@ export class GeminiProvider implements AIProvider {
     }
   }
 
-  private getTokensUsed(result: GenerateContentResponse): number {
-    return result.usageMetadata?.totalTokenCount ?? 0;
+  private getUsage(result: GenerateContentResponse, prompt: string, output: string) {
+    const metadata = result.usageMetadata as
+      | {
+          totalTokenCount?: number;
+          promptTokenCount?: number;
+          candidatesTokenCount?: number;
+        }
+      | undefined;
+
+    const estimatedInputTokens = usageService.estimateTokensFromText(prompt);
+    const estimatedOutputTokens = usageService.estimateTokensFromText(output);
+    const inputTokens = metadata?.promptTokenCount ?? estimatedInputTokens;
+    const outputTokens = metadata?.candidatesTokenCount ?? estimatedOutputTokens;
+    const tokensUsed = metadata?.totalTokenCount ?? inputTokens + outputTokens;
+
+    const outputTokenCount =
+      metadata?.candidatesTokenCount ??
+      (metadata?.totalTokenCount ? Math.max(tokensUsed - inputTokens, 0) : outputTokens);
+
+    return {
+      tokensUsed,
+      inputTokens,
+      outputTokens: outputTokenCount
+    };
   }
 }
