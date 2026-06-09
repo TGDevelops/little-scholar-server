@@ -1,0 +1,81 @@
+$kind: http-example
+name: Synced attempts for the child.
+request:
+  url: "{{baseUrl}}/api/exam-attempts/children/:childId"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  pathVariables:
+    childId: 802a6d85-86b6-ca28-2940-221245bb7f19
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": [
+          {
+            "id": "5b15e6cc-dd21-2e4e-2f5c-1a62fd4d97f4",
+            "userId": "93d7ffd0-05cc-7ddc-bc73-14f9545820f3",
+            "childId": "5f8adfe6-8968-92df-afef-ebe09916d0ca",
+            "grade": "Grade 1",
+            "subject": "Hindi",
+            "difficulty": "Hard",
+            "questionCount": 1818,
+            "correctAnswers": 1102,
+            "scorePercentage": 1207.1406432456322,
+            "strongTopics": [
+              "string",
+              "string"
+            ],
+            "weakTopics": [
+              "string",
+              "string"
+            ],
+            "attemptedAt": "1975-07-03T00:30:14.138Z",
+            "createdAt": "1969-06-05T00:10:05.718Z",
+            "updatedAt": "1997-09-14T09:26:55.012Z",
+            "examId": null,
+            "totalMarks": 5769,
+            "earnedMarks": null,
+            "timeSpentSeconds": null,
+            "answers": ""
+          },
+          {
+            "id": "4c55e5db-8451-c02e-7d74-33237eea1d83",
+            "userId": "e8f2976a-8e3f-4e1f-2332-7c1a6254d92e",
+            "childId": "41099513-c13a-d6a0-03b4-31684641ec7e",
+            "grade": "LKG",
+            "subject": "Maths",
+            "difficulty": "Easy",
+            "questionCount": 1703,
+            "correctAnswers": 1677,
+            "scorePercentage": 2301.2333410285346,
+            "strongTopics": [
+              "string",
+              "string"
+            ],
+            "weakTopics": [
+              "string",
+              "string"
+            ],
+            "attemptedAt": "1996-08-24T08:14:34.477Z",
+            "createdAt": "1975-04-06T09:38:52.368Z",
+            "updatedAt": "2008-05-05T10:31:00.881Z",
+            "examId": null,
+            "totalMarks": 4148,
+            "earnedMarks": null,
+            "timeSpentSeconds": null,
+            "answers": ""
+          }
+        ]
+      }
+order: 1000

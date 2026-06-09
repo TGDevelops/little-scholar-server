@@ -1,0 +1,54 @@
+$kind: http-example
+name: Missing, invalid, or expired access token.
+request:
+  url: "{{baseUrl}}/api/exam-attempts"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "childId": "88703273-19bd-7546-c2ef-d2a9a8026133",
+        "subject": "Hindi",
+        "difficulty": "Medium",
+        "questionCount": 16,
+        "correctAnswers": 36,
+        "examId": "string",
+        "grade": "Grade 1",
+        "totalMarks": 787,
+        "earnedMarks": 819,
+        "scorePercentage": 69.13669370492809,
+        "timeSpentSeconds": 47315,
+        "answers": "",
+        "strongTopics": [
+          "string",
+          "string"
+        ],
+        "weakTopics": [
+          "string",
+          "string"
+        ],
+        "attemptedAt": "1962-11-27T03:29:44.395Z"
+      }
+response:
+  statusCode: 401
+  statusText: Unauthorized
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": false,
+        "error": {
+          "message": "Authentication required"
+        }
+      }
+order: 3000

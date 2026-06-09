@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/children"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Aarav",
+      "age": 6,
+      "grade": "UKG",
+      "avatarUrl": "http://ApLBNlTzfUJNHIhnz.qpvGiiRf40yVphR+1z4Ib0JUT7"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Create a child profile.resources/examples
+order: 2000

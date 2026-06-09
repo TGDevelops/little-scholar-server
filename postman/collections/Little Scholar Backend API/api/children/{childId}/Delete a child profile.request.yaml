@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/children/:childId"
+method: DELETE
+headers:
+  Accept: application/json
+pathVariables:
+  childId: 802a6d85-86b6-ca28-2940-221245bb7f19
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Delete a child profile.resources/examples
+order: 2000

@@ -1,0 +1,28 @@
+$kind: http-example
+name: Requested resource was not found for the authenticated user.
+request:
+  url: "{{baseUrl}}/api/performance/children/:childId"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  pathVariables:
+    childId: 802a6d85-86b6-ca28-2940-221245bb7f19
+response:
+  statusCode: 404
+  statusText: Not Found
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": false,
+        "error": {
+          "message": "Child profile not found"
+        }
+      }
+order: 3000

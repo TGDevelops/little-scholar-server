@@ -1,0 +1,46 @@
+$kind: http-example
+name: Child profile updated.
+request:
+  url: "{{baseUrl}}/api/children/:childId"
+  method: PUT
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  pathVariables:
+    childId: 802a6d85-86b6-ca28-2940-221245bb7f19
+  body:
+    type: json
+    content: |-
+      {
+        "name": "string",
+        "age": 6,
+        "grade": "LKG",
+        "avatarUrl": "https://dATeMawVw.juquBhpkGU+RVrEcG7XBlqw11YYsaSCA73VmVnC0nGjDqqzXLaOmRvv"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": false,
+        "data": {
+          "id": "2cf8ae0e-21e8-c225-0872-816d1e3e0cc9",
+          "userId": "dbce3cbd-5ddc-5bac-3d26-b96e11b0f1c3",
+          "name": "string",
+          "age": 6936,
+          "grade": "LKG",
+          "createdAt": "1980-01-13T13:52:50.021Z",
+          "updatedAt": "1946-09-14T11:25:26.719Z",
+          "avatarUrl": "http://q.fryhk.aDd"
+        }
+      }
+order: 1000

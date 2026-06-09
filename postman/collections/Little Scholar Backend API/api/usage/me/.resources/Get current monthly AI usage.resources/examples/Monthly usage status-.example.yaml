@@ -1,0 +1,31 @@
+$kind: http-example
+name: Monthly usage status.
+request:
+  url: "{{baseUrl}}/api/usage/me"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": false,
+        "data": {
+          "plan": "FREE",
+          "monthlyLimit": 10000,
+          "tokensUsed": 2300,
+          "remainingTokens": 7700,
+          "periodStart": "1959-09-07T03:56:44.035Z",
+          "periodEnd": "1953-04-02T23:56:16.310Z"
+        }
+      }
+order: 1000

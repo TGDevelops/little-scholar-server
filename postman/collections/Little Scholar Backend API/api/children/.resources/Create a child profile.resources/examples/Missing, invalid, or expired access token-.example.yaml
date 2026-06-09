@@ -1,0 +1,37 @@
+$kind: http-example
+name: Missing, invalid, or expired access token.
+request:
+  url: "{{baseUrl}}/api/children"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "name": "Aarav",
+        "age": 6,
+        "grade": "UKG",
+        "avatarUrl": "http://ApLBNlTzfUJNHIhnz.qpvGiiRf40yVphR+1z4Ib0JUT7"
+      }
+response:
+  statusCode: 401
+  statusText: Unauthorized
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": false,
+        "error": {
+          "message": "Authentication required"
+        }
+      }
+order: 3000

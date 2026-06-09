@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/children/:childId"
+method: PUT
+headers:
+  Content-Type: application/json
+  Accept: application/json
+pathVariables:
+  childId: 802a6d85-86b6-ca28-2940-221245bb7f19
+body:
+  type: json
+  content: |-
+    {
+      "name": "string",
+      "age": 6,
+      "grade": "LKG",
+      "avatarUrl": "https://dATeMawVw.juquBhpkGU+RVrEcG7XBlqw11YYsaSCA73VmVnC0nGjDqqzXLaOmRvv"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Update a child profile.resources/examples
+order: 1000

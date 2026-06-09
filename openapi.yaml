@@ -190,83 +190,53 @@ paths:
           $ref: '#/components/responses/AuthError'
         '429':
           $ref: '#/components/responses/RateLimitError'
-  /api/exams/generate:
+  /api/exams/{examId}/attempt:
     post:
       tags:
         - Exams
-      operationId: generateExam
-      summary: Generate an AI exam paper
-      description: Generates an exam paper with correct answers for local iOS evaluation.
+      operationId: submitGeneratedExamAttempt
+      summary: Submit a saved generated exam attempt
+      description: Atomically saves the result and marks the generated paper as completed.
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ExamId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GenerateExamRequest'
+              $ref: '#/components/schemas/SubmitGeneratedExamAttemptRequest'
             examples:
               default:
                 value:
-                  grade: UKG
-                  subject: Maths
-                  difficulty: Easy
-                  questionCount: 10
+                  correctAnswers: 8
+                  totalMarks: 10
+                  earnedMarks: 8
+                  timeSpentSeconds: 240
+                  strongTopics:
+                    - Counting
+                  weakTopics:
+                    - Subtraction
       responses:
         '201':
-          description: Generated exam paper.
+          description: Attempt saved and generated paper completed.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenerateExamResponse'
-              examples:
-                generatedExam:
-                  value:
-                    success: true
-                    data:
-                      examId: 3791cf6e-8f01-46d1-ae47-6c95f9f8935a
-                      grade: UKG
-                      subject: Maths
-                      difficulty: Easy
-                      questionCount: 10
-                      questions:
-                        - id: q1
-                          type: mcq
-                          question: What comes after 5?
-                          options:
-                            - '4'
-                            - '6'
-                            - '7'
-                            - '3'
-                          correctAnswer: '6'
-                          acceptableAnswers:
-                            - '6'
-                            - six
-                          explanation: 6 comes after 5.
-                          topic: Number sequence
-                          marks: 1
-                      usage:
-                        tokensUsed: 900
-                        remainingTokens: 9100
-                        monthlyLimit: 10000
+                $ref: '#/components/schemas/SubmitGeneratedExamAttemptResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
         '401':
           $ref: '#/components/responses/AuthError'
-        '429':
-          $ref: '#/components/responses/QuotaOrRateLimitError'
-        '502':
-          description: AI provider returned invalid or contract-breaking output.
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Generated exam paper is not pending.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                providerError:
-                  value:
-                    success: false
-                    error:
-                      message: Gemini provider request failed
   /api/children:
     post:
       tags:
@@ -308,6 +278,78 @@ paths:
                 $ref: '#/components/schemas/ChildProfileListResponse'
         '401':
           $ref: '#/components/responses/AuthError'
+  /api/children/{childId}/exams/generate:
+    post:
+      tags:
+        - Exams
+      operationId: generateChildExam
+      summary: Generate and save an exam paper for a child
+      description: Generates AI questions, saves the paper as pending for the selected child, and returns the saved paper.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ChildId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateChildExamRequest'
+            examples:
+              default:
+                value:
+                  subject: Maths
+                  difficulty: Easy
+                  questionCount: 10
+      responses:
+        '201':
+          description: Saved pending exam paper.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneratedSavedExamPaperResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/QuotaOrRateLimitError'
+        '502':
+          description: AI provider returned invalid or contract-breaking output.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/children/{childId}/exams:
+    get:
+      tags:
+        - Exams
+      operationId: listChildExams
+      summary: List saved exam papers for a child
+      description: Defaults to pending papers for the selected child.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ChildId'
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExamPaperStatus'
+          example: pending
+      responses:
+        '200':
+          description: Saved exam papers for the child.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedExamPaperListResponse'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
   /api/children/{childId}:
     put:
       tags:
@@ -512,6 +554,13 @@ components:
   parameters:
     ChildId:
       name: childId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ExamId:
+      name: examId
       in: path
       required: true
       schema:
@@ -784,16 +833,13 @@ components:
         - true_false
         - fill_blank
         - match_following
-    GenerateExamRequest:
+    GenerateChildExamRequest:
       type: object
       required:
-        - grade
         - subject
         - difficulty
         - questionCount
       properties:
-        grade:
-          $ref: '#/components/schemas/Grade'
         subject:
           $ref: '#/components/schemas/Subject'
         difficulty:
@@ -804,6 +850,12 @@ components:
           maximum: 25
           example: 10
       additionalProperties: false
+    ExamPaperStatus:
+      type: string
+      enum:
+        - pending
+        - completed
+        - deleted
     ExamQuestion:
       type: object
       required:
@@ -864,37 +916,6 @@ components:
           minimum: 1
           example: 1
       additionalProperties: false
-    ExamPaper:
-      type: object
-      required:
-        - examId
-        - grade
-        - subject
-        - difficulty
-        - questionCount
-        - questions
-        - usage
-      properties:
-        examId:
-          type: string
-          format: uuid
-        grade:
-          $ref: '#/components/schemas/Grade'
-        subject:
-          $ref: '#/components/schemas/Subject'
-        difficulty:
-          $ref: '#/components/schemas/Difficulty'
-        questionCount:
-          type: integer
-          minimum: 1
-        questions:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ExamQuestion'
-        usage:
-          $ref: '#/components/schemas/AIUsage'
-      additionalProperties: false
     AIUsage:
       type: object
       required:
@@ -912,13 +933,88 @@ components:
           type: integer
           minimum: 0
       additionalProperties: false
-    GenerateExamResponse:
+    SavedExamPaper:
+      type: object
+      required:
+        - examId
+        - userId
+        - childId
+        - grade
+        - subject
+        - difficulty
+        - questionCount
+        - questions
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        examId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        childId:
+          type: string
+          format: uuid
+        grade:
+          $ref: '#/components/schemas/Grade'
+        subject:
+          $ref: '#/components/schemas/Subject'
+        difficulty:
+          $ref: '#/components/schemas/Difficulty'
+        questionCount:
+          type: integer
+          minimum: 1
+        questions:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ExamQuestion'
+        status:
+          $ref: '#/components/schemas/ExamPaperStatus'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+        deletedAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+      additionalProperties: false
+    SavedExamPaperWithUsage:
+      allOf:
+        - $ref: '#/components/schemas/SavedExamPaper'
+        - type: object
+          required:
+            - usage
+          properties:
+            usage:
+              $ref: '#/components/schemas/AIUsage'
+    GeneratedSavedExamPaperResponse:
       allOf:
         - $ref: '#/components/schemas/ApiSuccess'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/ExamPaper'
+              $ref: '#/components/schemas/SavedExamPaperWithUsage'
+    SavedExamPaperListResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/SavedExamPaper'
     ChildProfileRequest:
       type: object
       required:
@@ -1183,6 +1279,65 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/ExamAttempt'
+    SubmitGeneratedExamAttemptRequest:
+      type: object
+      required:
+        - correctAnswers
+      properties:
+        correctAnswers:
+          type: integer
+          minimum: 0
+          maximum: 200
+        totalMarks:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        earnedMarks:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        scorePercentage:
+          type: number
+          minimum: 0
+          maximum: 100
+        timeSpentSeconds:
+          type: integer
+          minimum: 0
+          maximum: 86400
+        answers:
+          description: Optional client answer details.
+        strongTopics:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+        weakTopics:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+        attemptedAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    SubmitGeneratedExamAttemptPayload:
+      type: object
+      required:
+        - exam
+        - attempt
+      properties:
+        exam:
+          $ref: '#/components/schemas/SavedExamPaper'
+        attempt:
+          $ref: '#/components/schemas/ExamAttempt'
+      additionalProperties: false
+    SubmitGeneratedExamAttemptResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiSuccess'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SubmitGeneratedExamAttemptPayload'
     AnalyticsChildSummary:
       type: object
       required:

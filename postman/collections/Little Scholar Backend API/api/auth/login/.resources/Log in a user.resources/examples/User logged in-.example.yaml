@@ -1,0 +1,44 @@
+$kind: http-example
+name: User logged in.
+request:
+  url: "{{baseUrl}}/api/auth/login"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "email": "parent@example.com",
+        "password": "Password123!"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "user": {
+            "id": "7c7912ff-f961-41fd-8b46-b746f2e47cc1",
+            "name": "Tejesh Gangari",
+            "email": "parent@example.com",
+            "city": "Hyderabad",
+            "plan": "FREE",
+            "createdAt": "2026-05-28T00:00:00.000Z",
+            "updatedAt": "2026-05-28T00:00:00.000Z"
+          },
+          "accessToken": "jwt-token"
+        }
+      }
+order: 1000

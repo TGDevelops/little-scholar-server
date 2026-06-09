@@ -1,0 +1,21 @@
+$kind: http-request
+description: |
+  Generates and stores a parent-friendly insight from the selected child's synced exam attempts.
+url: "{{baseUrl}}/api/analytics/generate"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "childId": "98525277-d560-8ab4-5a80-288a60b3639d",
+      "period": "last_30_days"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Generate an AI learning insight.resources/examples
+order: 1000

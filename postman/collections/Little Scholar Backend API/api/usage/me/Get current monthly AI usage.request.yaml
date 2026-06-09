@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/usage/me"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Get current monthly AI usage.resources/examples
+order: 1000

@@ -1,0 +1,67 @@
+$kind: http-example
+name: Generated exam paper.
+request:
+  url: "{{baseUrl}}/api/exams/generate"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "grade": "UKG",
+        "subject": "Maths",
+        "difficulty": "Easy",
+        "questionCount": 10
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "examId": "3791cf6e-8f01-46d1-ae47-6c95f9f8935a",
+          "grade": "UKG",
+          "subject": "Maths",
+          "difficulty": "Easy",
+          "questionCount": 10,
+          "questions": [
+            {
+              "id": "q1",
+              "type": "mcq",
+              "question": "What comes after 5?",
+              "options": [
+                "4",
+                "6",
+                "7",
+                "3"
+              ],
+              "correctAnswer": "6",
+              "acceptableAnswers": [
+                "6",
+                "six"
+              ],
+              "explanation": "6 comes after 5.",
+              "topic": "Number sequence",
+              "marks": 1
+            }
+          ],
+          "usage": {
+            "tokensUsed": 900,
+            "remainingTokens": 9100,
+            "monthlyLimit": 10000
+          }
+        }
+      }
+order: 1000

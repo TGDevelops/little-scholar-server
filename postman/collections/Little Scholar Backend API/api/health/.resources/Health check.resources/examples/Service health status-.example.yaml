@@ -1,0 +1,28 @@
+$kind: http-example
+name: Service health status.
+request:
+  url: "{{baseUrl}}/api/health"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "status": "ok",
+          "service": "little-scholar-be",
+          "timestamp": "2026-05-28T00:00:00.000Z"
+        }
+      }
+order: 1000

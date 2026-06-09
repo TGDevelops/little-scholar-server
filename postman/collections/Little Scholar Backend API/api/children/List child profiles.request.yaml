@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/children"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/List child profiles.resources/examples
+order: 3000

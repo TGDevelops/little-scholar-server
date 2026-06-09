@@ -1,4 +1,7 @@
-import type { GenerateExamInput, GeneratedExam } from '../../validators/exam.validator';
+import type {
+  GeneratedExam,
+  ResolvedGenerateExamInput
+} from '../../validators/exam.validator';
 import type {
   GenerateAnalyticsInsightInput,
   GeneratedAnalyticsInsight
@@ -22,7 +25,7 @@ export type GenerateAnalyticsInsightResult = {
 
 export interface AIProvider {
   readonly name: string;
-  generateExam(input: GenerateExamInput): Promise<GenerateExamResult>;
+  generateExam(input: ResolvedGenerateExamInput): Promise<GenerateExamResult>;
   generateAnalyticsInsight(
     input: GenerateAnalyticsInsightInput
   ): Promise<GenerateAnalyticsInsightResult>;

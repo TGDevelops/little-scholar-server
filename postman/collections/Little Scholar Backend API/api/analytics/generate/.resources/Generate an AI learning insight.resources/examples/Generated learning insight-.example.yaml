@@ -1,0 +1,59 @@
+$kind: http-example
+name: Generated learning insight.
+request:
+  url: "{{baseUrl}}/api/analytics/generate"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "childId": "98525277-d560-8ab4-5a80-288a60b3639d",
+        "period": "last_30_days"
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "id": "de29a0f0-b83a-6675-3526-c875ffa38208",
+          "userId": "5e5407b5-9467-4aab-8372-8fcf2e6c3939",
+          "childId": "6810ad15-0c57-e47a-5cf3-abc45492d892",
+          "period": "string",
+          "summary": "string",
+          "strengths": [
+            "string",
+            "string"
+          ],
+          "needsPractice": [
+            "string",
+            "string"
+          ],
+          "recommendations": [
+            "string",
+            "string"
+          ],
+          "suggestedDifficulty": "Easy",
+          "createdAt": "1990-04-27T21:25:58.328Z",
+          "usage": {
+            "tokensUsed": 8509,
+            "remainingTokens": 729,
+            "monthlyLimit": 2903
+          },
+          "metadata": ""
+        }
+      }
+order: 1000

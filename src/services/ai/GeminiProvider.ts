@@ -6,7 +6,10 @@ import { AppError } from '../../utils/AppError';
 import { usageService } from '../usage.service';
 import { buildAnalyticsInsightPrompt } from '../../prompts/analyticsInsightPrompt';
 import { buildExamGenerationPrompt } from '../../prompts/examGenerationPrompt';
-import { generatedExamSchema, type GenerateExamInput } from '../../validators/exam.validator';
+import {
+  generatedExamSchema,
+  type ResolvedGenerateExamInput
+} from '../../validators/exam.validator';
 import {
   generatedAnalyticsInsightSchema,
   type GenerateAnalyticsInsightInput
@@ -42,7 +45,7 @@ export class GeminiProvider implements AIProvider {
     }
   }
 
-  async generateExam(input: GenerateExamInput): Promise<GenerateExamResult> {
+  async generateExam(input: ResolvedGenerateExamInput): Promise<GenerateExamResult> {
     const examId = uuidv4();
     const prompt = buildExamGenerationPrompt(input, examId);
     const result = await this.generateContent(prompt, 1500);
