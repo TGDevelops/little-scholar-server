@@ -1,0 +1,11 @@
+$kind: collection
+description: |
+  API specification for the Little Scholar backend. The service provides health checks, parent authentication, child profiles, AI exam generation, synced exam attempts, performance summaries, usage quotas, and AI learning insights for the Little Scholar iOS app.
+variables:
+  baseUrl: /
+auth:
+  - id: 1015c668-bc8a-44dc-b1b6-ceb581508ac9
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{bearerToken}}"

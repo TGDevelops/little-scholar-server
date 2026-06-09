@@ -1,0 +1,38 @@
+$kind: http-request
+url: "{{baseUrl}}/api/exam-attempts"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "childId": "88703273-19bd-7546-c2ef-d2a9a8026133",
+      "subject": "Hindi",
+      "difficulty": "Medium",
+      "questionCount": 16,
+      "correctAnswers": 36,
+      "examId": "string",
+      "grade": "Grade 1",
+      "totalMarks": 787,
+      "earnedMarks": 819,
+      "scorePercentage": 69.13669370492809,
+      "timeSpentSeconds": 47315,
+      "answers": "",
+      "strongTopics": [
+        "string",
+        "string"
+      ],
+      "weakTopics": [
+        "string",
+        "string"
+      ],
+      "attemptedAt": "1962-11-27T03:29:44.395Z"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Sync an exam attempt.resources/examples
+order: 2000

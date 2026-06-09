@@ -1,0 +1,16 @@
+$kind: http-request
+description: Authenticates a parent account and returns a JWT access token.
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "parent@example.com",
+      "password": "Password123!"
+    }
+examples: ./.resources/Log in a user.resources/examples
+order: 1000

@@ -1,0 +1,17 @@
+$kind: http-request
+url: https://little-scholar-server-production.up.railway.app/api/exams/generate
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "grade": "Grade 1",
+      "subject": "Maths",
+      "difficulty": "Hard",
+      "questionCount": 5
+    }
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmY2YxZDdhNy00YTkyLTRjOTUtOWFmMy1kYjczMzNiOWY5ZWYiLCJlbWFpbCI6InRnZGV2ZWxvcHNAZ21haWwuY29tIiwiaWF0IjoxNzgwNDE3ODIyLCJleHAiOjE3ODEwMjI2MjJ9.nlCddwJqF6_prfRFKPjE5IwU30kOjGak7S5HcCfSHqc
+order: 6000

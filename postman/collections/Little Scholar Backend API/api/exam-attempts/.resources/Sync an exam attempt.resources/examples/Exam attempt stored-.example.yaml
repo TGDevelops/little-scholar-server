@@ -1,0 +1,78 @@
+$kind: http-example
+name: Exam attempt stored.
+request:
+  url: "{{baseUrl}}/api/exam-attempts"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "childId": "88703273-19bd-7546-c2ef-d2a9a8026133",
+        "subject": "Hindi",
+        "difficulty": "Medium",
+        "questionCount": 16,
+        "correctAnswers": 36,
+        "examId": "string",
+        "grade": "Grade 1",
+        "totalMarks": 787,
+        "earnedMarks": 819,
+        "scorePercentage": 69.13669370492809,
+        "timeSpentSeconds": 47315,
+        "answers": "",
+        "strongTopics": [
+          "string",
+          "string"
+        ],
+        "weakTopics": [
+          "string",
+          "string"
+        ],
+        "attemptedAt": "1962-11-27T03:29:44.395Z"
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "id": "86487d65-e649-ddab-2f9e-df07e43f5748",
+          "userId": "44639e1a-57a4-3232-fa0f-73574eef2323",
+          "childId": "7868e7f1-421a-d535-f611-3dbe4c372d55",
+          "grade": "LKG",
+          "subject": "Hindi",
+          "difficulty": "Easy",
+          "questionCount": 5239,
+          "correctAnswers": 4489,
+          "scorePercentage": 4482.435440232774,
+          "strongTopics": [
+            "string",
+            "string"
+          ],
+          "weakTopics": [
+            "string",
+            "string"
+          ],
+          "attemptedAt": "1955-12-10T14:19:02.131Z",
+          "createdAt": "2003-01-25T22:45:34.680Z",
+          "updatedAt": "2010-08-12T11:16:45.805Z",
+          "examId": null,
+          "totalMarks": null,
+          "earnedMarks": 6791,
+          "timeSpentSeconds": null,
+          "answers": ""
+        }
+      }
+order: 1000

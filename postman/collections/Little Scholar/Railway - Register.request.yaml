@@ -1,0 +1,7 @@
+$kind: http-request
+url: https://little-scholar-server-production.up.railway.app/api/auth/login
+method: POST
+body:
+  type: json
+  content: '{"email":"test-user@example.com","password":"TestPass123"}'
+order: 4000

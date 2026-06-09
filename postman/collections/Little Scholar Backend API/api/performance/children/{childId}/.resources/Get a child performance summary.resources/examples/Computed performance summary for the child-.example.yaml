@@ -1,0 +1,81 @@
+$kind: http-example
+name: Computed performance summary for the child.
+request:
+  url: "{{baseUrl}}/api/performance/children/:childId"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  pathVariables:
+    childId: 802a6d85-86b6-ca28-2940-221245bb7f19
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "child": {
+            "id": "70f64d8a-9c98-9290-51f6-ac5481a2a19b",
+            "name": "string",
+            "age": 9851,
+            "grade": "Nursery"
+          },
+          "period": "current_month",
+          "summary": {
+            "totalExams": 435,
+            "averageScore": 62.04632174553646,
+            "bestScore": 0.6826328183406671,
+            "totalQuestions": 5247,
+            "correctAnswers": 2554,
+            "subjects": [
+              {
+                "subject": "English",
+                "averageScore": 33.22375541454343,
+                "totalExams": 1640,
+                "strongTopics": [
+                  "string",
+                  "string"
+                ],
+                "weakTopics": [
+                  "string",
+                  "string"
+                ]
+              },
+              {
+                "subject": "Maths",
+                "averageScore": 42.21379538504024,
+                "totalExams": 8746,
+                "strongTopics": [
+                  "string",
+                  "string"
+                ],
+                "weakTopics": [
+                  "string",
+                  "string"
+                ]
+              }
+            ],
+            "recentTrend": [
+              {
+                "subject": "EVS",
+                "percentage": 49.874462655762144,
+                "attemptedAt": "1946-12-10T05:53:36.839Z"
+              },
+              {
+                "subject": "GK",
+                "percentage": 96.45109001204194,
+                "attemptedAt": "1959-08-27T14:13:24.125Z"
+              }
+            ]
+          }
+        }
+      }
+order: 1000

@@ -1,0 +1,28 @@
+$kind: http-example
+name: Missing, invalid, or expired access token.
+request:
+  url: "{{baseUrl}}/api/analytics/children/:childId"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  pathVariables:
+    childId: 802a6d85-86b6-ca28-2940-221245bb7f19
+response:
+  statusCode: 401
+  statusText: Unauthorized
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": false,
+        "error": {
+          "message": "Authentication required"
+        }
+      }
+order: 2000

@@ -1,0 +1,44 @@
+$kind: http-example
+name: Child profile created.
+request:
+  url: "{{baseUrl}}/api/children"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "name": "Aarav",
+        "age": 6,
+        "grade": "UKG",
+        "avatarUrl": "http://ApLBNlTzfUJNHIhnz.qpvGiiRf40yVphR+1z4Ib0JUT7"
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": false,
+        "data": {
+          "id": "2cf8ae0e-21e8-c225-0872-816d1e3e0cc9",
+          "userId": "dbce3cbd-5ddc-5bac-3d26-b96e11b0f1c3",
+          "name": "string",
+          "age": 6936,
+          "grade": "LKG",
+          "createdAt": "1980-01-13T13:52:50.021Z",
+          "updatedAt": "1946-09-14T11:25:26.719Z",
+          "avatarUrl": "http://q.fryhk.aDd"
+        }
+      }
+order: 1000

@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/exam-attempts/children/:childId"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  childId: 802a6d85-86b6-ca28-2940-221245bb7f19
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/List synced attempts for a child.resources/examples
+order: 1000

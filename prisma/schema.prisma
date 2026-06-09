@@ -35,6 +35,7 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   children      ChildProfile[]
+  generatedExams GeneratedExamPaper[]
   examAttempts  ExamAttempt[]
   aiInsights    AIInsight[]
   usageLogs     UsageLog[]
@@ -53,11 +54,34 @@ model ChildProfile {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  generatedExams GeneratedExamPaper[]
   examAttempts ExamAttempt[]
   aiInsights   AIInsight[]
 
   @@index([userId])
   @@map("child_profiles")
+}
+
+model GeneratedExamPaper {
+  id            String       @id @default(uuid())
+  userId        String
+  childId       String
+  grade         String
+  subject       String
+  difficulty    String
+  questionCount Int
+  questions     Json
+  status        String       @default("pending")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  completedAt   DateTime?
+  deletedAt     DateTime?
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  child         ChildProfile @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([childId, status])
+  @@map("generated_exam_papers")
 }
 
 model ExamAttempt {

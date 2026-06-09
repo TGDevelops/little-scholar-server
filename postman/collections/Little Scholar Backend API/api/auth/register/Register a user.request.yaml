@@ -1,0 +1,18 @@
+$kind: http-request
+description: Creates a parent account and returns a JWT access token.
+url: "{{baseUrl}}/api/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Tejesh Gangari",
+      "email": "parent@example.com",
+      "city": "Hyderabad",
+      "password": "Password123!"
+    }
+examples: ./.resources/Register a user.resources/examples
+order: 1000

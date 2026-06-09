@@ -1,0 +1,17 @@
+# Use this workspace to collaborate
+workspace:
+  id: b0b780cc-4eca-4663-aa88-51507265a324
+
+# All resources in the `postman/` folder are automatically registered in Local View.
+# Point to additional files outside the `postman/` folder to register them individually. Example:
+
+localResources:
+  specs:
+    - ../openapi.yaml
+    - ../openapi.yml
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ../postman/collections/Little Scholar: 19796892-11d53541-c744-4125-9888-c91a45645786

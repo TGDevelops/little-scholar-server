@@ -1,0 +1,45 @@
+$kind: http-example
+name: Child profiles for the authenticated parent.
+request:
+  url: "{{baseUrl}}/api/children"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": [
+          {
+            "id": "baea7cca-4d3e-377e-e0dd-bcf4ce68254f",
+            "userId": "002c6755-f2c5-e909-e756-37ae8ec93408",
+            "name": "string",
+            "age": 9709,
+            "grade": "Nursery",
+            "createdAt": "2006-02-22T03:03:41.143Z",
+            "updatedAt": "1946-12-16T05:56:45.266Z",
+            "avatarUrl": null
+          },
+          {
+            "id": "c3d7b95d-47c6-6aad-aab8-389c0dabb8f0",
+            "userId": "1ac8edab-4ccd-a2e5-54fa-b8e7db62dd80",
+            "name": "string",
+            "age": 8474,
+            "grade": "Nursery",
+            "createdAt": "1989-01-11T13:23:47.528Z",
+            "updatedAt": "1984-11-04T07:34:09.719Z",
+            "avatarUrl": null
+          }
+        ]
+      }
+order: 1000

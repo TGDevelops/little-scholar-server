@@ -1,0 +1,36 @@
+$kind: http-example
+name: AI provider returned invalid output.
+request:
+  url: "{{baseUrl}}/api/analytics/generate"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "childId": "98525277-d560-8ab4-5a80-288a60b3639d",
+        "period": "last_30_days"
+      }
+response:
+  statusCode: 502
+  statusText: Bad Gateway
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": false,
+        "error": {
+          "message": "string",
+          "details": ""
+        }
+      }
+order: 6000
