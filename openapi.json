@@ -51,7 +51,7 @@
     },
     {
       "name": "Usage",
-      "description": "Monthly AI usage status endpoints."
+      "description": "Product plan usage and quota status endpoints."
     }
   ],
   "paths": {
@@ -239,6 +239,9 @@
           },
           "401": {
             "$ref": "#/components/responses/AuthError"
+          },
+          "403": {
+            "$ref": "#/components/responses/PlanQuotaError"
           },
           "429": {
             "$ref": "#/components/responses/RateLimitError"
@@ -865,7 +868,7 @@
           "Usage"
         ],
         "operationId": "getMyUsage",
-        "summary": "Get current monthly AI usage",
+        "summary": "Get current product usage",
         "security": [
           {
             "bearerAuth": []
@@ -873,7 +876,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Monthly usage status.",
+            "description": "Current plan quota status.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1010,18 +1013,42 @@
         }
       },
       "QuotaOrRateLimitError": {
-        "description": "Monthly AI quota reached or too many requests.",
+        "description": "Product quota reached or too many requests.",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResponse"
             },
             "examples": {
-              "quotaReached": {
+              "questionLimitReached": {
                 "value": {
                   "success": false,
                   "error": {
-                    "message": "Monthly AI usage limit reached."
+                    "code": "QUESTION_LIMIT_REACHED",
+                    "message": "Weekly question generation limit reached.",
+                    "details": {
+                      "questionsUsedThisWeek": 195,
+                      "weeklyQuestionLimit": 200,
+                      "questionsRemainingThisWeek": 5
+                    }
+                  }
+                }
+              },
+              "freeInsightLimitReached": {
+                "value": {
+                  "success": false,
+                  "error": {
+                    "code": "AI_INSIGHT_WEEKLY_LIMIT_REACHED",
+                    "message": "Free plan includes 1 AI insight per week. Upgrade to Premium for daily insights."
+                  }
+                }
+              },
+              "premiumInsightLimitReached": {
+                "value": {
+                  "success": false,
+                  "error": {
+                    "code": "AI_INSIGHT_DAILY_LIMIT_REACHED",
+                    "message": "AI insight already generated for this child today. Please try again tomorrow."
                   }
                 }
               },
@@ -1030,6 +1057,31 @@
                   "success": false,
                   "error": {
                     "message": "Too many requests, please try again later"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "PlanQuotaError": {
+        "description": "Plan limit reached.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "childLimitReached": {
+                "value": {
+                  "success": false,
+                  "error": {
+                    "code": "CHILD_LIMIT_REACHED",
+                    "message": "Free plan supports 1 child profile. Upgrade to Premium to add up to 5 children.",
+                    "details": {
+                      "childrenUsed": 1,
+                      "childrenLimit": 1
+                    }
                   }
                 }
               }
@@ -1071,6 +1123,10 @@
               "message"
             ],
             "properties": {
+              "code": {
+                "type": "string",
+                "description": "Stable application error code for product quota and domain errors."
+              },
               "message": {
                 "type": "string"
               },
@@ -1432,29 +1488,6 @@
         },
         "additionalProperties": false
       },
-      "AIUsage": {
-        "type": "object",
-        "required": [
-          "tokensUsed",
-          "remainingTokens",
-          "monthlyLimit"
-        ],
-        "properties": {
-          "tokensUsed": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "remainingTokens": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "monthlyLimit": {
-            "type": "integer",
-            "minimum": 0
-          }
-        },
-        "additionalProperties": false
-      },
       "SavedExamPaper": {
         "type": "object",
         "required": [
@@ -1531,24 +1564,6 @@
         },
         "additionalProperties": false
       },
-      "SavedExamPaperWithUsage": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/SavedExamPaper"
-          },
-          {
-            "type": "object",
-            "required": [
-              "usage"
-            ],
-            "properties": {
-              "usage": {
-                "$ref": "#/components/schemas/AIUsage"
-              }
-            }
-          }
-        ]
-      },
       "GeneratedSavedExamPaperResponse": {
         "allOf": [
           {
@@ -1558,7 +1573,7 @@
             "type": "object",
             "properties": {
               "data": {
-                "$ref": "#/components/schemas/SavedExamPaperWithUsage"
+                "$ref": "#/components/schemas/SavedExamPaper"
               }
             }
           }
@@ -2326,24 +2341,6 @@
         },
         "additionalProperties": false
       },
-      "GeneratedAnalyticsInsight": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AnalyticsInsight"
-          },
-          {
-            "type": "object",
-            "required": [
-              "usage"
-            ],
-            "properties": {
-              "usage": {
-                "$ref": "#/components/schemas/AIUsage"
-              }
-            }
-          }
-        ]
-      },
       "GenerateAnalyticsInsightResponse": {
         "allOf": [
           {
@@ -2353,7 +2350,7 @@
             "type": "object",
             "properties": {
               "data": {
-                "$ref": "#/components/schemas/GeneratedAnalyticsInsight"
+                "$ref": "#/components/schemas/AnalyticsInsight"
               }
             }
           }
@@ -2378,40 +2375,131 @@
         ]
       },
       "UsageStatus": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/FreeUsageStatus"
+          },
+          {
+            "$ref": "#/components/schemas/PremiumUsageStatus"
+          }
+        ]
+      },
+      "FreeUsageStatus": {
         "type": "object",
         "required": [
           "plan",
-          "monthlyLimit",
-          "tokensUsed",
-          "remainingTokens",
-          "periodStart",
-          "periodEnd"
+          "questionsUsedThisWeek",
+          "weeklyQuestionLimit",
+          "questionsRemainingThisWeek",
+          "insightsUsedThisWeek",
+          "weeklyInsightLimit",
+          "insightsRemainingThisWeek",
+          "childrenUsed",
+          "childrenLimit",
+          "weekStart",
+          "weekEnd"
         ],
         "properties": {
           "plan": {
             "type": "string",
-            "enum": [
-              "FREE",
-              "PREMIUM"
-            ]
+            "const": "FREE"
           },
-          "monthlyLimit": {
+          "questionsUsedThisWeek": {
             "type": "integer",
-            "example": 10000
+            "example": 45
           },
-          "tokensUsed": {
+          "weeklyQuestionLimit": {
             "type": "integer",
-            "example": 2300
+            "example": 200
           },
-          "remainingTokens": {
+          "questionsRemainingThisWeek": {
             "type": "integer",
-            "example": 7700
+            "example": 155
           },
-          "periodStart": {
+          "insightsUsedThisWeek": {
+            "type": "integer",
+            "example": 0
+          },
+          "weeklyInsightLimit": {
+            "type": "integer",
+            "example": 1
+          },
+          "insightsRemainingThisWeek": {
+            "type": "integer",
+            "example": 1
+          },
+          "childrenUsed": {
+            "type": "integer",
+            "example": 1
+          },
+          "childrenLimit": {
+            "type": "integer",
+            "example": 1
+          },
+          "weekStart": {
             "type": "string",
             "format": "date-time"
           },
-          "periodEnd": {
+          "weekEnd": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PremiumUsageStatus": {
+        "type": "object",
+        "required": [
+          "plan",
+          "questionsUsedThisWeek",
+          "weeklyQuestionLimit",
+          "questionsRemainingThisWeek",
+          "dailyInsightLimitPerChild",
+          "childrenUsed",
+          "childrenLimit",
+          "weekStart",
+          "weekEnd"
+        ],
+        "properties": {
+          "plan": {
+            "type": "string",
+            "const": "PREMIUM"
+          },
+          "questionsUsedThisWeek": {
+            "type": "integer",
+            "example": 320
+          },
+          "weeklyQuestionLimit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "example": null
+          },
+          "questionsRemainingThisWeek": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "example": null
+          },
+          "dailyInsightLimitPerChild": {
+            "type": "integer",
+            "example": 1
+          },
+          "childrenUsed": {
+            "type": "integer",
+            "example": 3
+          },
+          "childrenLimit": {
+            "type": "integer",
+            "example": 5
+          },
+          "weekStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "weekEnd": {
             "type": "string",
             "format": "date-time"
           }

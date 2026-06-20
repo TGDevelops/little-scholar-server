@@ -1,5 +1,6 @@
 import { prisma } from '../config/prisma';
 import { AppError } from '../utils/AppError';
+import { planQuotaService } from './planQuotaService';
 import type { CreateChildInput, UpdateChildInput } from '../validators/child.validator';
 
 const childSelect = {
@@ -15,6 +16,8 @@ const childSelect = {
 
 export const childService = {
   async createChild(userId: string, input: CreateChildInput) {
+    await planQuotaService.assertCanCreateChild(userId);
+
     return prisma.childProfile.create({
       data: {
         userId,

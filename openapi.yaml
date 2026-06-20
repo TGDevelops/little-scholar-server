@@ -30,7 +30,7 @@ tags:
   - name: Analytics
     description: AI insight generation and history from synced learning data.
   - name: Usage
-    description: Monthly AI usage status endpoints.
+    description: Product plan usage and quota status endpoints.
 paths:
   /api/health:
     get:
@@ -156,6 +156,8 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '401':
           $ref: '#/components/responses/AuthError'
+        '403':
+          $ref: '#/components/responses/PlanQuotaError'
         '429':
           $ref: '#/components/responses/RateLimitError'
   /api/auth/me:
@@ -530,12 +532,12 @@ paths:
       tags:
         - Usage
       operationId: getMyUsage
-      summary: Get current monthly AI usage
+      summary: Get current product usage
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Monthly usage status.
+          description: Current plan quota status.
           content:
             application/json:
               schema:
@@ -620,22 +622,55 @@ components:
                 error:
                   message: Too many requests, please try again later
     QuotaOrRateLimitError:
-      description: Monthly AI quota reached or too many requests.
+      description: Product quota reached or too many requests.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           examples:
-            quotaReached:
+            questionLimitReached:
               value:
                 success: false
                 error:
-                  message: Monthly AI usage limit reached.
+                  code: QUESTION_LIMIT_REACHED
+                  message: Weekly question generation limit reached.
+                  details:
+                    questionsUsedThisWeek: 195
+                    weeklyQuestionLimit: 200
+                    questionsRemainingThisWeek: 5
+            freeInsightLimitReached:
+              value:
+                success: false
+                error:
+                  code: AI_INSIGHT_WEEKLY_LIMIT_REACHED
+                  message: Free plan includes 1 AI insight per week. Upgrade to Premium for daily insights.
+            premiumInsightLimitReached:
+              value:
+                success: false
+                error:
+                  code: AI_INSIGHT_DAILY_LIMIT_REACHED
+                  message: AI insight already generated for this child today. Please try again tomorrow.
             tooManyRequests:
               value:
                 success: false
                 error:
                   message: Too many requests, please try again later
+    PlanQuotaError:
+      description: Plan limit reached.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            childLimitReached:
+              value:
+                success: false
+                error:
+                  code: CHILD_LIMIT_REACHED
+                  message: Free plan supports 1 child profile. Upgrade to Premium to add up to 5 children.
+                  details:
+                    childrenUsed: 1
+                    childrenLimit: 1
   schemas:
     ApiSuccess:
       type: object
@@ -662,6 +697,9 @@ components:
           required:
             - message
           properties:
+            code:
+              type: string
+              description: Stable application error code for product quota and domain errors.
             message:
               type: string
             details:
@@ -916,23 +954,6 @@ components:
           minimum: 1
           example: 1
       additionalProperties: false
-    AIUsage:
-      type: object
-      required:
-        - tokensUsed
-        - remainingTokens
-        - monthlyLimit
-      properties:
-        tokensUsed:
-          type: integer
-          minimum: 0
-        remainingTokens:
-          type: integer
-          minimum: 0
-        monthlyLimit:
-          type: integer
-          minimum: 0
-      additionalProperties: false
     SavedExamPaper:
       type: object
       required:
@@ -990,22 +1011,13 @@ components:
             - 'null'
           format: date-time
       additionalProperties: false
-    SavedExamPaperWithUsage:
-      allOf:
-        - $ref: '#/components/schemas/SavedExamPaper'
-        - type: object
-          required:
-            - usage
-          properties:
-            usage:
-              $ref: '#/components/schemas/AIUsage'
     GeneratedSavedExamPaperResponse:
       allOf:
         - $ref: '#/components/schemas/ApiSuccess'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/SavedExamPaperWithUsage'
+              $ref: '#/components/schemas/SavedExamPaper'
     SavedExamPaperListResponse:
       allOf:
         - $ref: '#/components/schemas/ApiSuccess'
@@ -1536,22 +1548,13 @@ components:
           type: string
           format: date-time
       additionalProperties: false
-    GeneratedAnalyticsInsight:
-      allOf:
-        - $ref: '#/components/schemas/AnalyticsInsight'
-        - type: object
-          required:
-            - usage
-          properties:
-            usage:
-              $ref: '#/components/schemas/AIUsage'
     GenerateAnalyticsInsightResponse:
       allOf:
         - $ref: '#/components/schemas/ApiSuccess'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/GeneratedAnalyticsInsight'
+              $ref: '#/components/schemas/AnalyticsInsight'
     AnalyticsInsightListResponse:
       allOf:
         - $ref: '#/components/schemas/ApiSuccess'
@@ -1562,33 +1565,100 @@ components:
               items:
                 $ref: '#/components/schemas/AnalyticsInsight'
     UsageStatus:
+      oneOf:
+        - $ref: '#/components/schemas/FreeUsageStatus'
+        - $ref: '#/components/schemas/PremiumUsageStatus'
+    FreeUsageStatus:
       type: object
       required:
         - plan
-        - monthlyLimit
-        - tokensUsed
-        - remainingTokens
-        - periodStart
-        - periodEnd
+        - questionsUsedThisWeek
+        - weeklyQuestionLimit
+        - questionsRemainingThisWeek
+        - insightsUsedThisWeek
+        - weeklyInsightLimit
+        - insightsRemainingThisWeek
+        - childrenUsed
+        - childrenLimit
+        - weekStart
+        - weekEnd
       properties:
         plan:
           type: string
-          enum:
-            - FREE
-            - PREMIUM
-        monthlyLimit:
+          const: FREE
+        questionsUsedThisWeek:
           type: integer
-          example: 10000
-        tokensUsed:
+          example: 45
+        weeklyQuestionLimit:
           type: integer
-          example: 2300
-        remainingTokens:
+          example: 200
+        questionsRemainingThisWeek:
           type: integer
-          example: 7700
-        periodStart:
+          example: 155
+        insightsUsedThisWeek:
+          type: integer
+          example: 0
+        weeklyInsightLimit:
+          type: integer
+          example: 1
+        insightsRemainingThisWeek:
+          type: integer
+          example: 1
+        childrenUsed:
+          type: integer
+          example: 1
+        childrenLimit:
+          type: integer
+          example: 1
+        weekStart:
           type: string
           format: date-time
-        periodEnd:
+        weekEnd:
+          type: string
+          format: date-time
+      additionalProperties: false
+    PremiumUsageStatus:
+      type: object
+      required:
+        - plan
+        - questionsUsedThisWeek
+        - weeklyQuestionLimit
+        - questionsRemainingThisWeek
+        - dailyInsightLimitPerChild
+        - childrenUsed
+        - childrenLimit
+        - weekStart
+        - weekEnd
+      properties:
+        plan:
+          type: string
+          const: PREMIUM
+        questionsUsedThisWeek:
+          type: integer
+          example: 320
+        weeklyQuestionLimit:
+          type:
+            - integer
+            - 'null'
+          example: null
+        questionsRemainingThisWeek:
+          type:
+            - integer
+            - 'null'
+          example: null
+        dailyInsightLimitPerChild:
+          type: integer
+          example: 1
+        childrenUsed:
+          type: integer
+          example: 3
+        childrenLimit:
+          type: integer
+          example: 5
+        weekStart:
+          type: string
+          format: date-time
+        weekEnd:
           type: string
           format: date-time
       additionalProperties: false
