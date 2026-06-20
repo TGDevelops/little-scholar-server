@@ -1,10 +1,9 @@
 import { OperationType, Prisma } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
 import { prisma } from '../config/prisma';
 import { createAIProvider } from './ai';
 import { childService } from './child.service';
+import { planQuotaService } from './planQuotaService';
 import { usageService } from './usage.service';
-import { buildExamGenerationPrompt } from '../prompts/examGenerationPrompt';
 import { AppError } from '../utils/AppError';
 import type {
   GenerateChildExamInput,
@@ -64,7 +63,7 @@ export const examService = {
       difficulty: input.difficulty,
       questionCount: input.questionCount
     };
-    const { result, usage } = await generateWithUsage(userId, resolvedInput);
+    const { result } = await generateWithUsage(userId, resolvedInput);
 
     const paper = await prisma.generatedExamPaper.create({
       data: {
@@ -81,13 +80,10 @@ export const examService = {
       select: generatedExamPaperSelect
     });
 
+    await planQuotaService.recordQuestionGeneration(userId, result.exam.questionCount);
+
     return {
-      ...toSavedExamPaperResponse(paper),
-      usage: {
-        tokensUsed: result.usage.tokensUsed,
-        remainingTokens: usage.remainingTokens,
-        monthlyLimit: usage.monthlyLimit
-      }
+      ...toSavedExamPaperResponse(paper)
     };
   },
 
@@ -172,11 +168,7 @@ export const examService = {
 };
 
 const generateWithUsage = async (userId: string, resolvedInput: ResolvedGenerateExamInput) => {
-  const estimatedPrompt = buildExamGenerationPrompt(resolvedInput, uuidv4());
-  const estimatedTokens =
-    usageService.estimateTokensFromText(estimatedPrompt) + resolvedInput.questionCount * 90;
-
-  await usageService.assertWithinTokenLimit(userId, estimatedTokens);
+  await planQuotaService.assertCanGenerateQuestions(userId, resolvedInput.questionCount);
 
   const result = await aiProvider.generateExam(resolvedInput);
 
@@ -188,9 +180,7 @@ const generateWithUsage = async (userId: string, resolvedInput: ResolvedGenerate
     result.usage.outputTokens
   );
 
-  const usage = await usageService.getRemainingTokens(userId);
-
-  return { result, usage };
+  return { result };
 };
 
 const toSavedExamPaperResponse = (paper: {

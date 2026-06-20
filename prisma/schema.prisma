@@ -18,6 +18,11 @@ enum OperationType {
   AI_INSIGHT_GENERATION
 }
 
+enum UsageEventType {
+  QUESTION_GENERATION
+  AI_INSIGHT_GENERATION
+}
+
 enum SubscriptionStatus {
   NONE
   ACTIVE
@@ -39,6 +44,7 @@ model User {
   examAttempts  ExamAttempt[]
   aiInsights    AIInsight[]
   usageLogs     UsageLog[]
+  usageEvents   UsageEvent[]
   subscriptions Subscription[]
 
   @@map("users")
@@ -146,6 +152,21 @@ model UsageLog {
   @@index([userId])
   @@index([userId, createdAt])
   @@map("usage_logs")
+}
+
+model UsageEvent {
+  id        String         @id @default(uuid())
+  userId    String
+  childId   String?
+  eventType UsageEventType
+  count     Int
+  createdAt DateTime       @default(now())
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, eventType, createdAt])
+  @@index([userId, childId, eventType, createdAt])
+  @@map("usage_events")
 }
 
 model Subscription {

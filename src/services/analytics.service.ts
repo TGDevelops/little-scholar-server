@@ -1,10 +1,9 @@
-import { Prisma } from '@prisma/client';
-import { OperationType } from '@prisma/client';
+import { OperationType, Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { createAIProvider } from './ai';
+import { planQuotaService } from './planQuotaService';
 import { performanceService } from './performance.service';
 import { usageService } from './usage.service';
-import { buildAnalyticsInsightPrompt } from '../prompts/analyticsInsightPrompt';
 import {
   aiAnalyticsInsightInputSchema,
   type GenerateAnalyticsForChildInput
@@ -48,10 +47,7 @@ export const analyticsService = {
       }
     });
 
-    const prompt = buildAnalyticsInsightPrompt(aiInput);
-    const estimatedTokens = usageService.estimateTokensFromText(prompt) + 600;
-
-    await usageService.assertWithinTokenLimit(userId, estimatedTokens);
+    await planQuotaService.assertCanGenerateAIInsight(userId, input.childId);
 
     const result = await aiProvider.generateAnalyticsInsight(aiInput);
 
@@ -63,7 +59,6 @@ export const analyticsService = {
       result.usage.outputTokens
     );
 
-    const usage = await usageService.getRemainingTokens(userId);
     const insight = await prisma.aIInsight.create({
       data: {
         userId,
@@ -82,14 +77,9 @@ export const analyticsService = {
       select: aiInsightSelect
     });
 
-    return {
-      ...insight,
-      usage: {
-        tokensUsed: result.usage.tokensUsed,
-        remainingTokens: usage.remainingTokens,
-        monthlyLimit: usage.monthlyLimit
-      }
-    };
+    await planQuotaService.recordAIInsightGeneration(userId, input.childId);
+
+    return insight;
   },
 
   async listInsightsForChild(userId: string, childId: string) {
