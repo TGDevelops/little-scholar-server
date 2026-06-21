@@ -1454,7 +1454,7 @@
           },
           "options": {
             "type": "array",
-            "description": "Required for mcq, picture_mcq, true_false, and simple_true_false. Not used for match_following or simple_match.",
+            "description": "Required for mcq, picture_mcq, true_false, simple_true_false, missing_number, and sequence_ordering. For sequence_ordering, options are shuffled items to arrange.",
             "items": {
               "type": "string"
             },
@@ -1546,7 +1546,7 @@
                 }
               }
             ],
-            "description": "For match_following/simple_match, an object mapping each left item to the matching right item. For categorization, an object mapping category names to item arrays.",
+            "description": "For sequence_ordering, an ordered array of the options. For match_following/simple_match, an object mapping each left item to the matching right item. For categorization, an object mapping category names to item arrays.",
             "example": {
               "Cat": "Animal",
               "Rose": "Flower",

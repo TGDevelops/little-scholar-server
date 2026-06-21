@@ -85,13 +85,20 @@ const validQuestions = Object.entries(gradeOneHardMaths.questionTypeDistribution
         passage: type === 'reading_comprehension' ? 'Riya has a red bag.' : undefined,
         leftItems: type === 'match_following' ? ['2 + 3'] : undefined,
         rightItems: type === 'match_following' ? ['5'] : undefined,
-        correctAnswer: type === 'match_following' ? { '2 + 3': '5' } : '15',
+        correctAnswer:
+          type === 'match_following'
+            ? { '2 + 3': '5' }
+            : type === 'sequence_ordering'
+              ? ['9', '11', '14', '16']
+              : '15',
         options:
           type === 'true_false'
             ? ['True', 'False']
             : type === 'mcq'
               ? ['13', '14', '15', '16']
-              : undefined
+              : type === 'sequence_ordering'
+                ? ['16', '9', '14', '11']
+                : undefined
       })
     )
 );

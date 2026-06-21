@@ -52,7 +52,7 @@ export class GeminiProvider implements AIProvider {
   ): Promise<GenerateExamResult> {
     const examId = uuidv4();
     const prompt = buildExamGenerationPrompt(input, examId, blueprint);
-    const result = await this.generateContent(prompt, 3000);
+    const result = await this.generateContent(prompt, 2048);
     const rawText = result.text;
 
     if (!rawText) {
@@ -119,8 +119,7 @@ export class GeminiProvider implements AIProvider {
           ],
           generationConfig: {
             temperature: 0.5,
-            maxOutputTokens,
-            responseMimeType: 'application/json'
+            maxOutputTokens
           }
         };
 
@@ -191,8 +190,20 @@ export class GeminiProvider implements AIProvider {
         );
       }
 
+      console.error('Gemini provider request failed', {
+        provider: this.name,
+        model: env.GEMINI_MODEL,
+        useApiKey: this.useApiKey,
+        maxOutputTokens,
+        message
+      });
+
       throw new AppError('Gemini provider request failed', 502, {
-        provider: this.name
+        provider: this.name,
+        reason: 'GEMINI_PROVIDER_REQUEST_FAILED',
+        model: env.GEMINI_MODEL,
+        maxOutputTokens,
+        upstreamMessage: message
       });
     }
   }

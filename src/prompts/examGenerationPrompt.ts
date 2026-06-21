@@ -13,7 +13,6 @@ export const buildExamGenerationPrompt = (
     subject: input.subject,
     difficulty: input.difficulty,
     learningStage: blueprint.learningStage,
-    allowedConcepts: blueprint.allowedConcepts,
     selectedConcepts: blueprint.selectedConcepts,
     allowedQuestionTypes: blueprint.allowedQuestionTypes,
     questionTypeDistribution: blueprint.questionTypeDistribution,
@@ -47,7 +46,7 @@ export const buildExamGenerationPrompt = (
             'Required for visual question types such as picture_identification, count_and_answer, color_recognition, shape_recognition, odd_one_out, compare_objects, picture_mcq, and pattern_recognition.'
           ],
           options: [
-            'Required for mcq, picture_mcq, true_false, and simple_true_false. Do not use for match_following or simple_match.'
+            'Required for mcq, picture_mcq, true_false, simple_true_false, missing_number, and sequence_ordering. For sequence_ordering, options are shuffled items to arrange.'
           ],
           leftItems: [
             'Required only for match_following and simple_match. Items shown in the left column.'
@@ -83,6 +82,8 @@ export const buildExamGenerationPrompt = (
       'Every question must include id, type, question, correctAnswer, explanation, topic, learningObjective, difficultyLevel, and marks.',
       'Every mcq and picture_mcq question must include 4 options and exactly one correct option.',
       'Every true_false and simple_true_false question must include options ["True", "False"].',
+      'Every missing_number question must include answer choices in options.',
+      'Every sequence_ordering question must include shuffled items in options and correctAnswer must be the ordered array of those items.',
       'Every match_following and simple_match question must include leftItems and rightItems arrays with the same length.',
       'For match_following and simple_match, rightItems must be shuffled and correctAnswer must map each left item to its matching right item.',
       'For Nursery and LKG visual question types, use visualElements with simple emoji or short visual labels.',

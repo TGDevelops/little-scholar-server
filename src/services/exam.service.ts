@@ -208,6 +208,15 @@ const generateWithUsage = async (
         attempt
       });
     } catch (error) {
+      if (
+        error instanceof AppError &&
+        error.details &&
+        typeof error.details === 'object' &&
+        'reason' in error.details
+      ) {
+        throw error;
+      }
+
       const reason = error instanceof Error ? error.message : 'Unknown generation error';
       lastValidationReasons = [reason];
       console.warn('Exam generation attempt failed', {

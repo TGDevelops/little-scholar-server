@@ -105,6 +105,7 @@ export const generatedQuestionSchema = z
     const fourOptionTypes: QuestionType[] = ['mcq', 'picture_mcq'];
     const trueFalseTypes: QuestionType[] = ['true_false', 'simple_true_false'];
     const matchTypes: QuestionType[] = ['match_following', 'simple_match'];
+    const optionOrderingTypes: QuestionType[] = ['sequence_ordering', 'missing_number'];
     const visualTypes: QuestionType[] = [
       'picture_identification',
       'count_and_answer',
@@ -189,6 +190,25 @@ export const generatedQuestionSchema = z
           message: 'Match-the-following correctAnswer values must be strings'
         });
       }
+    }
+
+    if (
+      optionOrderingTypes.includes(question.type) &&
+      (!question.options || question.options.length < 2)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['options'],
+        message: `${question.type} questions must include at least 2 options`
+      });
+    }
+
+    if (question.type === 'sequence_ordering' && !Array.isArray(question.correctAnswer)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['correctAnswer'],
+        message: 'Sequence ordering correctAnswer must be the ordered array of options'
+      });
     }
 
     if (visualTypes.includes(question.type) && !question.visualElements?.length) {
