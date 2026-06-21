@@ -1,17 +1,22 @@
 import { z } from 'zod';
+import {
+  isQuestionTypeAllowedForGrade,
+  questionTypes,
+  type QuestionType
+} from '../config/gradeQuestionConfig';
 
 export const gradeSchema = z.enum(['Nursery', 'LKG', 'UKG', 'Grade 1']);
 export const subjectSchema = z.enum(['English', 'Maths', 'Hindi', 'EVS', 'GK']);
 export const difficultySchema = z.enum(['Easy', 'Medium', 'Hard']);
-export const questionTypeSchema = z.enum([
-  'mcq',
-  'true_false',
-  'fill_blank',
-  'match_following'
-]);
+export const questionTypeSchema = z.enum(questionTypes);
 export const examPaperStatusSchema = z.enum(['pending', 'completed', 'deleted']);
 
 const topicSchema = z.string().trim().min(1).max(80);
+const correctAnswerSchema = z.union([
+  z.string(),
+  z.array(z.string()),
+  z.record(z.union([z.string(), z.array(z.string())]))
+]);
 const childIdParamsSchema = z
   .object({
     childId: z.string().uuid()
@@ -79,14 +84,33 @@ export const generatedQuestionSchema = z
     type: questionTypeSchema,
     question: z.string().min(1),
     options: z.array(z.string()).optional(),
-    correctAnswer: z.union([z.string(), z.array(z.string()), z.record(z.string())]),
+    visualElements: z.array(z.string().min(1)).optional(),
+    leftItems: z.array(z.string().min(1)).optional(),
+    rightItems: z.array(z.string().min(1)).optional(),
+    passage: z.string().min(1).optional(),
+    categories: z.array(z.string().min(1)).optional(),
+    correctAnswer: correctAnswerSchema,
     acceptableAnswers: z.array(z.string()).optional(),
     explanation: z.string().min(1),
     topic: z.string().min(1),
     marks: z.number().int().positive()
   })
   .superRefine((question, ctx) => {
-    if (question.type === 'mcq' && question.options?.length !== 4) {
+    const fourOptionTypes: QuestionType[] = ['mcq', 'picture_mcq'];
+    const trueFalseTypes: QuestionType[] = ['true_false', 'simple_true_false'];
+    const matchTypes: QuestionType[] = ['match_following', 'simple_match'];
+    const visualTypes: QuestionType[] = [
+      'picture_identification',
+      'count_and_answer',
+      'shape_recognition',
+      'color_recognition',
+      'odd_one_out',
+      'compare_objects',
+      'picture_mcq',
+      'pattern_recognition'
+    ];
+
+    if (fourOptionTypes.includes(question.type) && question.options?.length !== 4) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['options'],
@@ -95,7 +119,7 @@ export const generatedQuestionSchema = z
     }
 
     if (
-      question.type === 'true_false' &&
+      trueFalseTypes.includes(question.type) &&
       (question.options?.length !== 2 ||
         !question.options.includes('True') ||
         !question.options.includes('False'))
@@ -106,16 +130,122 @@ export const generatedQuestionSchema = z
         message: 'True/false questions must include options ["True", "False"]'
       });
     }
+
+    if (matchTypes.includes(question.type)) {
+      if (!question.leftItems?.length) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['leftItems'],
+          message: 'Match-the-following questions must include leftItems'
+        });
+      }
+
+      if (!question.rightItems?.length) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['rightItems'],
+          message: 'Match-the-following questions must include rightItems'
+        });
+      }
+
+      if (
+        question.leftItems?.length &&
+        question.rightItems?.length &&
+        question.leftItems.length !== question.rightItems.length
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['rightItems'],
+          message: 'Match-the-following questions must include the same number of leftItems and rightItems'
+        });
+      }
+
+      if (
+        typeof question.correctAnswer !== 'object' ||
+        Array.isArray(question.correctAnswer)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['correctAnswer'],
+          message: 'Match-the-following correctAnswer must map left items to right items'
+        });
+      } else if (
+        Object.values(question.correctAnswer).some((answer) => Array.isArray(answer))
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['correctAnswer'],
+          message: 'Match-the-following correctAnswer values must be strings'
+        });
+      }
+    }
+
+    if (visualTypes.includes(question.type) && !question.visualElements?.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['visualElements'],
+        message: 'Visual question types must include visualElements'
+      });
+    }
+
+    if (question.type === 'reading_comprehension' && !question.passage) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['passage'],
+        message: 'Reading comprehension questions must include a short passage'
+      });
+    }
+
+    if (question.type === 'categorization') {
+      if (!question.categories || question.categories.length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['categories'],
+          message: 'Categorization questions must include at least two categories'
+        });
+      }
+
+      if (
+        typeof question.correctAnswer !== 'object' ||
+        Array.isArray(question.correctAnswer)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['correctAnswer'],
+          message: 'Categorization correctAnswer must map categories to item arrays'
+        });
+      } else if (
+        Object.values(question.correctAnswer).some((answer) => !Array.isArray(answer))
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['correctAnswer'],
+          message: 'Categorization correctAnswer values must be item arrays'
+        });
+      }
+    }
   });
 
-export const generatedExamSchema = z.object({
-  examId: z.string().uuid(),
-  grade: gradeSchema,
-  subject: subjectSchema,
-  difficulty: difficultySchema,
-  questionCount: z.number().int().positive(),
-  questions: z.array(generatedQuestionSchema).min(1)
-});
+export const generatedExamSchema = z
+  .object({
+    examId: z.string().uuid(),
+    grade: gradeSchema,
+    subject: subjectSchema,
+    difficulty: difficultySchema,
+    questionCount: z.number().int().positive(),
+    questions: z.array(generatedQuestionSchema).min(1)
+  })
+  .superRefine((exam, ctx) => {
+    exam.questions.forEach((question, index) => {
+      if (!isQuestionTypeAllowedForGrade(exam.grade, question.type)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['questions', index, 'type'],
+          message: `${question.type} is not allowed for ${exam.grade}`
+        });
+      }
+    });
+  });
 
 export type GenerateChildExamInput = z.infer<typeof generateChildExamSchema>['body'];
 export type ChildExamParams = z.infer<typeof generateChildExamSchema>['params'];

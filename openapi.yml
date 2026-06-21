@@ -867,10 +867,25 @@ components:
     QuestionType:
       type: string
       enum:
+        - picture_identification
+        - count_and_answer
+        - shape_recognition
+        - color_recognition
+        - odd_one_out
+        - compare_objects
+        - picture_mcq
+        - missing_number
+        - simple_match
+        - simple_true_false
         - mcq
         - true_false
         - fill_blank
         - match_following
+        - pattern_recognition
+        - sequence_ordering
+        - short_answer
+        - reading_comprehension
+        - categorization
     GenerateChildExamRequest:
       type: object
       required:
@@ -917,6 +932,7 @@ components:
           example: What comes after 5?
         options:
           type: array
+          description: Required for mcq, picture_mcq, true_false, and simple_true_false. Not used for match_following or simple_match.
           items:
             type: string
           example:
@@ -924,6 +940,46 @@ components:
             - '6'
             - '7'
             - '3'
+        visualElements:
+          type: array
+          description: Required for visual question types such as picture_identification, count_and_answer, color_recognition, shape_recognition, odd_one_out, compare_objects, picture_mcq, and pattern_recognition.
+          items:
+            type: string
+          example:
+            - 🐶
+            - 🐱
+            - 🐘
+            - 🐟
+        leftItems:
+          type: array
+          description: Required when type is match_following or simple_match. Items shown in the left column.
+          items:
+            type: string
+          example:
+            - Cat
+            - Rose
+            - Apple
+        rightItems:
+          type: array
+          description: Required when type is match_following or simple_match. Shuffled items shown in the right column.
+          items:
+            type: string
+          example:
+            - Fruit
+            - Animal
+            - Flower
+        passage:
+          type: string
+          description: Required when type is reading_comprehension.
+          example: Tom has a red ball.
+        categories:
+          type: array
+          description: Required when type is categorization.
+          items:
+            type: string
+          example:
+            - Animals
+            - Plants
         correctAnswer:
           oneOf:
             - type: string
@@ -932,8 +988,16 @@ components:
                 type: string
             - type: object
               additionalProperties:
-                type: string
-          example: '6'
+                oneOf:
+                  - type: string
+                  - type: array
+                    items:
+                      type: string
+          description: For match_following/simple_match, an object mapping each left item to the matching right item. For categorization, an object mapping category names to item arrays.
+          example:
+            Cat: Animal
+            Rose: Flower
+            Apple: Fruit
         acceptableAnswers:
           type: array
           items:

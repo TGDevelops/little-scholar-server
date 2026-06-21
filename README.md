@@ -337,7 +337,11 @@ Supported values:
 - Grades: `Nursery`, `LKG`, `UKG`, `Grade 1`
 - Subjects: `English`, `Maths`, `Hindi`, `EVS`, `GK`
 - Difficulty: `Easy`, `Medium`, `Hard`
-- Question types: `mcq`, `true_false`, `fill_blank`, `match_following`
+- Question types are selected by grade:
+  - Nursery: `picture_identification`, `count_and_answer`, `shape_recognition`, `color_recognition`, `odd_one_out`, `compare_objects`
+  - LKG: `picture_mcq`, `count_and_answer`, `missing_number`, `odd_one_out`, `simple_match`, `simple_true_false`
+  - UKG: `mcq`, `true_false`, `fill_blank`, `match_following`, `missing_number`, `pattern_recognition`, `sequence_ordering`
+  - Grade 1: `mcq`, `true_false`, `fill_blank`, `match_following`, `sequence_ordering`, `short_answer`, `reading_comprehension`, `categorization`
 
 Response:
 
@@ -361,18 +365,28 @@ Response:
         "explanation": "6 comes after 5.",
         "topic": "Number sequence",
         "marks": 1
+      },
+      {
+        "id": "q2",
+        "type": "match_following",
+        "question": "Match the following.",
+        "leftItems": ["Cat", "Rose", "Apple"],
+        "rightItems": ["Fruit", "Animal", "Flower"],
+        "correctAnswer": {
+          "Cat": "Animal",
+          "Rose": "Flower",
+          "Apple": "Fruit"
+        },
+        "explanation": "Cats are animals, roses are flowers, and apples are fruits.",
+        "topic": "Classification",
+        "marks": 3
       }
-    ],
-    "usage": {
-      "tokensUsed": 900,
-      "remainingTokens": 9100,
-      "monthlyLimit": 10000
-    }
+    ]
   }
 }
 ```
 
-If the estimated request would exceed the user monthly quota, the API returns `429` with `Monthly AI usage limit reached.`.
+If the weekly question quota is reached, the API returns `429` with `QUESTION_LIMIT_REACHED`.
 
 ### Generate AI Insight
 
