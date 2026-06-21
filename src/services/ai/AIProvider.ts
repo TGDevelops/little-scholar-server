@@ -6,6 +6,7 @@ import type {
   GenerateAnalyticsInsightInput,
   GeneratedAnalyticsInsight
 } from '../../validators/analytics.validator';
+import type { ExamBlueprint } from '../examBlueprintService';
 
 export type AIUsage = {
   tokensUsed: number;
@@ -25,7 +26,10 @@ export type GenerateAnalyticsInsightResult = {
 
 export interface AIProvider {
   readonly name: string;
-  generateExam(input: ResolvedGenerateExamInput): Promise<GenerateExamResult>;
+  generateExam(
+    input: ResolvedGenerateExamInput,
+    blueprint: ExamBlueprint
+  ): Promise<GenerateExamResult>;
   generateAnalyticsInsight(
     input: GenerateAnalyticsInsightInput
   ): Promise<GenerateAnalyticsInsightResult>;

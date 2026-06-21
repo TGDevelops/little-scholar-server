@@ -15,6 +15,7 @@ import {
   type GenerateAnalyticsInsightInput
 } from '../../validators/analytics.validator';
 import type { AIProvider, GenerateAnalyticsInsightResult, GenerateExamResult } from './AIProvider';
+import type { ExamBlueprint } from '../examBlueprintService';
 
 export class GeminiProvider implements AIProvider {
   public readonly name = 'gemini';
@@ -45,10 +46,13 @@ export class GeminiProvider implements AIProvider {
     }
   }
 
-  async generateExam(input: ResolvedGenerateExamInput): Promise<GenerateExamResult> {
+  async generateExam(
+    input: ResolvedGenerateExamInput,
+    blueprint: ExamBlueprint
+  ): Promise<GenerateExamResult> {
     const examId = uuidv4();
-    const prompt = buildExamGenerationPrompt(input, examId);
-    const result = await this.generateContent(prompt, 1500);
+    const prompt = buildExamGenerationPrompt(input, examId, blueprint);
+    const result = await this.generateContent(prompt, 3000);
     const rawText = result.text;
 
     if (!rawText) {

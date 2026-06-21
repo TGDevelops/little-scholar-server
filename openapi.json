@@ -1342,7 +1342,11 @@
           "Nursery",
           "LKG",
           "UKG",
-          "Grade 1"
+          "Grade 1",
+          "Grade 2",
+          "Grade 3",
+          "Grade 4",
+          "Grade 5"
         ]
       },
       "Subject": {
@@ -1383,8 +1387,11 @@
           "pattern_recognition",
           "sequence_ordering",
           "short_answer",
+          "word_problem",
           "reading_comprehension",
-          "categorization"
+          "categorization",
+          "application_based",
+          "reasoning_question"
         ]
       },
       "GenerateChildExamRequest": {
@@ -1427,6 +1434,8 @@
           "correctAnswer",
           "explanation",
           "topic",
+          "learningObjective",
+          "difficultyLevel",
           "marks"
         ],
         "properties": {
@@ -1562,7 +1571,16 @@
           "topic": {
             "type": "string",
             "minLength": 1,
-            "example": "Number sequence"
+            "description": "Must exactly match one backend-selected syllabus concept.",
+            "example": "Addition within 20"
+          },
+          "learningObjective": {
+            "type": "string",
+            "minLength": 1,
+            "example": "Solve a one-step addition word problem within 20."
+          },
+          "difficultyLevel": {
+            "$ref": "#/components/schemas/Difficulty"
           },
           "marks": {
             "type": "integer",

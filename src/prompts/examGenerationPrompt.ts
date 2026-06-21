@@ -1,31 +1,23 @@
-import {
-  getGradeQuestionConfig,
-  getQuestionTypeDistribution
-} from '../config/gradeQuestionConfig';
+import type { ExamBlueprint } from '../services/examBlueprintService';
 import type { ResolvedGenerateExamInput } from '../validators/exam.validator';
 
 export const buildExamGenerationPrompt = (
   input: ResolvedGenerateExamInput,
-  examId: string
+  examId: string,
+  blueprint: ExamBlueprint
 ): string => {
-  const gradeConfig = getGradeQuestionConfig(input.grade);
-  const questionTypeDistribution = getQuestionTypeDistribution(
-    input.grade,
-    input.questionCount
-  );
-
   return JSON.stringify({
     role: 'Little Scholar exam paper generator',
     task: `Generate one developmentally appropriate ${input.grade} exam paper as valid JSON only.`,
-    gradeFramework: {
-      grade: input.grade,
-      learningGoals: gradeConfig.learningGoals,
-      allowedQuestionTypes: gradeConfig.allowedQuestionTypes,
-      questionTypeDistribution,
-      developmentalRules: gradeConfig.rules,
-      difficulty: input.difficulty,
-      difficultyGuidance: gradeConfig.difficultyGuidance[input.difficulty]
-    },
+    grade: input.grade,
+    subject: input.subject,
+    difficulty: input.difficulty,
+    learningStage: blueprint.learningStage,
+    allowedConcepts: blueprint.allowedConcepts,
+    selectedConcepts: blueprint.selectedConcepts,
+    allowedQuestionTypes: blueprint.allowedQuestionTypes,
+    questionTypeDistribution: blueprint.questionTypeDistribution,
+    difficultyGuidance: blueprint.difficultyGuidance,
     qualityBar: {
       instruction:
         'Difficulty must change the reasoning demand, number range, and independence required. Do not only reuse easier questions with a Hard label.',
@@ -69,7 +61,9 @@ export const buildExamGenerationPrompt = (
             'Correct answer. For match_following/simple_match, return an object mapping left items to right items. For categorization, return an object mapping category names to item arrays.',
           acceptableAnswers: ['Alternative spellings or word forms when useful.'],
           explanation: 'Short child-friendly explanation.',
-          topic: 'Topic name',
+          topic: 'Must exactly match one selectedConcept.',
+          learningObjective: 'Specific learning objective directly related to topic.',
+          difficultyLevel: 'Easy | Medium | Hard. Must match requested difficulty.',
           marks: 1
         }
       ]
@@ -77,11 +71,16 @@ export const buildExamGenerationPrompt = (
     rules: [
       'Return JSON only. No markdown, no prose outside JSON, no code fences.',
       'Generate exactly questionCount questions.',
-      'Use only the allowedQuestionTypes listed in gradeFramework.',
-      'Follow the questionTypeDistribution counts exactly unless impossible for the requested subject.',
-      'Follow gradeFramework.difficultyGuidance for every question.',
+      'Generate questions only from selectedConcepts.',
+      'Do not use concepts outside selectedConcepts.',
+      'If a concept is not listed, do not generate a question from it.',
+      'Every question topic must exactly match one selectedConcept.',
+      'Every learningObjective must be directly related to the topic.',
+      'Every question type must be one of allowedQuestionTypes.',
+      'Follow questionTypeDistribution exactly.',
+      'Follow difficultyGuidance for every question.',
       'Reject internally and rewrite any question that is too easy for the requested grade and difficulty.',
-      'Every question must include id, type, question, correctAnswer, explanation, topic, and marks.',
+      'Every question must include id, type, question, correctAnswer, explanation, topic, learningObjective, difficultyLevel, and marks.',
       'Every mcq and picture_mcq question must include 4 options and exactly one correct option.',
       'Every true_false and simple_true_false question must include options ["True", "False"].',
       'Every match_following and simple_match question must include leftItems and rightItems arrays with the same length.',
@@ -89,8 +88,11 @@ export const buildExamGenerationPrompt = (
       'For Nursery and LKG visual question types, use visualElements with simple emoji or short visual labels.',
       'For reading_comprehension, include a passage field with one short child-friendly passage.',
       'For categorization, include categories and map each category to item arrays in correctAnswer.',
+      'For word_problem, include a short real-life scenario.',
+      'For reasoning_question, require reasoning but remain within selectedConcepts.',
+      'For application_based, apply a known selectedConcept to a simple situation.',
       'The exam must include correct answers so an iOS app can evaluate locally.',
-      'Questions must be age appropriate for Nursery, LKG, UKG, or Grade 1.',
+      'Questions must be age appropriate for Nursery through Grade 5.',
       'Questions must be CBSE foundational-stage friendly.',
       'Avoid adult, violent, scary, political, religious, sensitive, discriminatory, or unsafe content.',
       'Use simple language suitable for early learners.',

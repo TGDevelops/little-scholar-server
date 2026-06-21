@@ -13,6 +13,7 @@
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node src/prisma/seed.ts",
+    "test:exam-engine": "ts-node scripts/exam-engine-smoke-test.ts",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write ."
   },

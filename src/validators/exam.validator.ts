@@ -4,10 +4,14 @@ import {
   questionTypes,
   type QuestionType
 } from '../config/gradeQuestionConfig';
+import { supportedGrades } from '../config/supportedGrades';
 
-export const gradeSchema = z.enum(['Nursery', 'LKG', 'UKG', 'Grade 1']);
+export const gradeSchema = z.enum(supportedGrades);
+export type Grade = z.infer<typeof gradeSchema>;
 export const subjectSchema = z.enum(['English', 'Maths', 'Hindi', 'EVS', 'GK']);
+export type Subject = z.infer<typeof subjectSchema>;
 export const difficultySchema = z.enum(['Easy', 'Medium', 'Hard']);
+export type Difficulty = z.infer<typeof difficultySchema>;
 export const questionTypeSchema = z.enum(questionTypes);
 export const examPaperStatusSchema = z.enum(['pending', 'completed', 'deleted']);
 
@@ -93,6 +97,8 @@ export const generatedQuestionSchema = z
     acceptableAnswers: z.array(z.string()).optional(),
     explanation: z.string().min(1),
     topic: z.string().min(1),
+    learningObjective: z.string().min(1),
+    difficultyLevel: difficultySchema,
     marks: z.number().int().positive()
   })
   .superRefine((question, ctx) => {
@@ -108,6 +114,11 @@ export const generatedQuestionSchema = z
       'compare_objects',
       'picture_mcq',
       'pattern_recognition'
+    ];
+    const scenarioTypes: QuestionType[] = [
+      'word_problem',
+      'application_based',
+      'reasoning_question'
     ];
 
     if (fourOptionTypes.includes(question.type) && question.options?.length !== 4) {
@@ -193,6 +204,17 @@ export const generatedQuestionSchema = z
         code: z.ZodIssueCode.custom,
         path: ['passage'],
         message: 'Reading comprehension questions must include a short passage'
+      });
+    }
+
+    if (
+      scenarioTypes.includes(question.type) &&
+      question.question.trim().split(/\s+/).length < 8
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['question'],
+        message: `${question.type} questions must include a short real-life or reasoning scenario`
       });
     }
 

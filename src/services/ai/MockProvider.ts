@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from 'uuid';
-import { getGradeQuestionConfig } from '../../config/gradeQuestionConfig';
 import type {
   AIProvider,
   GenerateAnalyticsInsightResult,
@@ -11,18 +10,26 @@ import type {
   ResolvedGenerateExamInput
 } from '../../validators/exam.validator';
 import type { GenerateAnalyticsInsightInput } from '../../validators/analytics.validator';
+import type { ExamBlueprint } from '../examBlueprintService';
 
 export class MockProvider implements AIProvider {
   public readonly name = 'mock';
 
-  async generateExam(input: ResolvedGenerateExamInput): Promise<GenerateExamResult> {
+  async generateExam(
+    input: ResolvedGenerateExamInput,
+    blueprint: ExamBlueprint
+  ): Promise<GenerateExamResult> {
     const examId = uuidv4();
-    const allowedTypes = getGradeQuestionConfig(input.grade).allowedQuestionTypes;
+    const allowedTypes = blueprint.allowedQuestionTypes;
     const useHardGradeOneMath =
       input.grade === 'Grade 1' && input.subject === 'Maths' && input.difficulty === 'Hard';
+    const questionTypesBySlot = Object.entries(blueprint.questionTypeDistribution).flatMap(
+      ([questionType, count]) => Array.from({ length: count }, () => questionType)
+    ) as GeneratedQuestion['type'][];
 
     const question = (i: number): GeneratedQuestion => {
-      const type = allowedTypes[i % allowedTypes.length];
+      const type = questionTypesBySlot[i] ?? allowedTypes[i % allowedTypes.length];
+      const topic = blueprint.selectedConcepts[i % blueprint.selectedConcepts.length];
       const baseQuestion = {
         id: uuidv4(),
         type,
@@ -30,7 +37,9 @@ export class MockProvider implements AIProvider {
         correctAnswer: 'A',
         acceptableAnswers: ['A'],
         explanation: 'This is a mocked explanation.',
-        topic: 'Mock Topic',
+        topic,
+        learningObjective: `Practice ${topic}`,
+        difficultyLevel: input.difficulty,
         marks: 1
       };
 
@@ -38,7 +47,7 @@ export class MockProvider implements AIProvider {
         if (type === 'mcq') {
           return {
             ...baseQuestion,
-            question: 'Riya has 9 crayons. She gets 6 more. How many crayons does she have now?',
+          question: 'Riya has 9 crayons. She gets 6 more. How many crayons does she have now?',
             options: ['13', '14', '15', '16'],
             correctAnswer: '15',
             acceptableAnswers: ['15', 'fifteen']
