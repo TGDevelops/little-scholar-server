@@ -15,6 +15,7 @@ const envSchema = z.object({
   GOOGLE_CLOUD_PROJECT: z.string().optional(),
   GOOGLE_CLOUD_LOCATION: z.string().optional().default('us-central1'),
   GEMINI_MODEL: z.string().min(1).default('gemini-2.5-flash-lite'),
+  AI_REVIEW_ENABLED: z.coerce.boolean().default(false),
   GOOGLE_APPLICATION_CREDENTIALS_BASE64: z.string().optional(),
   GOOGLE_APPLICATION_CREDENTIALS_JSON: z.string().optional(),
   CORS_ORIGIN: z.string().default('*')

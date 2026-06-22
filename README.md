@@ -334,10 +334,20 @@ Request:
 
 Supported values:
 
-- Grades: `Nursery`, `LKG`, `UKG`, `Grade 1`
+- Grades: `Nursery`, `LKG`, `UKG`, `Grade 1`, `Grade 2`, `Grade 3`, `Grade 4`, `Grade 5`
 - Subjects: `English`, `Maths`, `Hindi`, `EVS`, `GK`
 - Difficulty: `Easy`, `Medium`, `Hard`
-- Question types: `mcq`, `true_false`, `fill_blank`, `match_following`
+- Question types are selected by grade:
+  - Nursery: `picture_identification`, `count_and_answer`, `shape_recognition`, `color_recognition`, `odd_one_out`, `compare_objects`
+  - LKG: `picture_mcq`, `count_and_answer`, `missing_number`, `odd_one_out`, `simple_match`, `simple_true_false`
+  - UKG: `mcq`, `true_false`, `fill_blank`, `match_following`, `missing_number`, `pattern_recognition`, `sequence_ordering`
+  - Grade 1: `mcq`, `true_false`, `fill_blank`, `match_following`, `sequence_ordering`, `short_answer`, `reading_comprehension`, `categorization`
+  - Grade 2: `mcq`, `true_false`, `fill_blank`, `match_following`, `short_answer`, `word_problem`, `reading_comprehension`, `categorization`, `sequence_ordering`
+  - Grade 3: `mcq`, `true_false`, `fill_blank`, `match_following`, `short_answer`, `word_problem`, `reading_comprehension`, `application_based`, `categorization`
+  - Grade 4: `mcq`, `true_false`, `fill_blank`, `match_following`, `short_answer`, `word_problem`, `reading_comprehension`, `application_based`, `reasoning_question`
+  - Grade 5: `mcq`, `true_false`, `fill_blank`, `match_following`, `short_answer`, `word_problem`, `reading_comprehension`, `application_based`, `reasoning_question`
+
+The backend controls the syllabus before calling Gemini. For each request it builds an exam blueprint from `src/config/cbseSyllabus.ts`, `src/config/questionTypesByGrade.ts`, and `src/config/difficultyGuidance.ts`. Gemini may only generate questions from the selected concepts, and each question topic must exactly match one selected concept.
 
 Response:
 
@@ -359,20 +369,48 @@ Response:
         "correctAnswer": "6",
         "acceptableAnswers": ["6", "six"],
         "explanation": "6 comes after 5.",
-        "topic": "Number sequence",
+        "topic": "Number sequences",
+        "learningObjective": "Identify the next number in a short sequence.",
+        "difficultyLevel": "Easy",
         "marks": 1
+      },
+      {
+        "id": "q2",
+        "type": "match_following",
+        "question": "Match the following.",
+        "leftItems": ["Cat", "Rose", "Apple"],
+        "rightItems": ["Fruit", "Animal", "Flower"],
+        "correctAnswer": {
+          "Cat": "Animal",
+          "Rose": "Flower",
+          "Apple": "Fruit"
+        },
+        "explanation": "Cats are animals, roses are flowers, and apples are fruits.",
+        "topic": "Animals",
+        "learningObjective": "Match familiar items to their groups.",
+        "difficultyLevel": "Easy",
+        "marks": 3
       }
-    ],
-    "usage": {
-      "tokensUsed": 900,
-      "remainingTokens": 9100,
-      "monthlyLimit": 10000
-    }
+    ]
   }
 }
 ```
 
-If the estimated request would exceed the user monthly quota, the API returns `429` with `Monthly AI usage limit reached.`.
+If the weekly question quota is reached, the API returns `429` with `QUESTION_LIMIT_REACHED`.
+
+If local validation fails twice, the API returns `502` with:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "SYLLABUS_ALIGNED_EXAM_GENERATION_FAILED",
+    "message": "Unable to generate a syllabus-aligned exam at this time. Please try again."
+  }
+}
+```
+
+Validation checks exact question count, grade-supported question types, selected syllabus concepts, required fields per question type, match-column lengths, MCQ option count, true/false options, and obvious syllabus drift.
 
 ### Generate AI Insight
 
@@ -458,16 +496,25 @@ Response:
   "success": true,
   "data": {
     "plan": "FREE",
-    "monthlyLimit": 10000,
-    "tokensUsed": 2300,
-    "remainingTokens": 7700,
-    "periodStart": "2026-06-01T00:00:00.000Z",
-    "periodEnd": "2026-06-30T23:59:59.999Z"
+    "questionsUsedThisWeek": 45,
+    "weeklyQuestionLimit": 200,
+    "questionsRemainingThisWeek": 155,
+    "insightsUsedThisWeek": 0,
+    "weeklyInsightLimit": 1,
+    "insightsRemainingThisWeek": 1,
+    "childrenUsed": 1,
+    "childrenLimit": 1,
+    "weekStart": "2026-06-01T00:00:00.000Z",
+    "weekEnd": "2026-06-07T23:59:59.999Z"
   }
 }
 ```
 
-Monthly AI limits are `10,000` tokens for `FREE` users and `100,000` tokens for `PREMIUM` users. Subscription verification is not active yet; `src/services/subscriptionService.ts` is a placeholder for StoreKit 2 and App Store Server API integration.
+Token usage is still recorded internally for cost monitoring, but user-facing quota APIs expose product limits instead of tokens. Subscription verification is not active yet; `src/services/subscriptionService.ts` is a placeholder for StoreKit 2 and App Store Server API integration.
+
+Set `AI_REVIEW_ENABLED=false` by default. The local syllabus validation path is always active; an AI review pass can be enabled later behind that flag.
+
+To add a new grade, update `src/config/supportedGrades.ts`, add syllabus concepts in `src/config/cbseSyllabus.ts`, add grade question types in `src/config/questionTypesByGrade.ts`, and update docs/OpenAPI.
 
 The backend does not implement `/api/exams/evaluate` in the MVP. Generated questions include correct answers so the iOS app can evaluate attempts locally.
 

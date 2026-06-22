@@ -10,24 +10,159 @@ import type {
   ResolvedGenerateExamInput
 } from '../../validators/exam.validator';
 import type { GenerateAnalyticsInsightInput } from '../../validators/analytics.validator';
+import type { ExamBlueprint } from '../examBlueprintService';
 
 export class MockProvider implements AIProvider {
   public readonly name = 'mock';
 
-  async generateExam(input: ResolvedGenerateExamInput): Promise<GenerateExamResult> {
+  async generateExam(
+    input: ResolvedGenerateExamInput,
+    blueprint: ExamBlueprint
+  ): Promise<GenerateExamResult> {
     const examId = uuidv4();
+    const allowedTypes = blueprint.allowedQuestionTypes;
+    const useHardGradeOneMath =
+      input.grade === 'Grade 1' && input.subject === 'Maths' && input.difficulty === 'Hard';
+    const questionTypesBySlot = Object.entries(blueprint.questionTypeDistribution).flatMap(
+      ([questionType, count]) => Array.from({ length: count }, () => questionType)
+    ) as GeneratedQuestion['type'][];
 
-    const question = (i: number): GeneratedQuestion => ({
-      id: uuidv4(),
-      type: 'mcq',
-      question: `Sample question ${i + 1} for ${input.subject}`,
-      options: ['A', 'B', 'C', 'D'],
-      correctAnswer: 'A',
-      acceptableAnswers: ['A'],
-      explanation: 'This is a mocked explanation.',
-      topic: 'Mock Topic',
-      marks: 1
-    });
+    const question = (i: number): GeneratedQuestion => {
+      const type = questionTypesBySlot[i] ?? allowedTypes[i % allowedTypes.length];
+      const topic = blueprint.selectedConcepts[i % blueprint.selectedConcepts.length];
+      const baseQuestion = {
+        id: uuidv4(),
+        type,
+        question: `Sample question ${i + 1} for ${input.subject}`,
+        correctAnswer: 'A',
+        acceptableAnswers: ['A'],
+        explanation: 'This is a mocked explanation.',
+        topic,
+        learningObjective: `Practice ${topic}`,
+        difficultyLevel: input.difficulty,
+        marks: 1
+      };
+
+      if (useHardGradeOneMath) {
+        if (type === 'mcq') {
+          return {
+            ...baseQuestion,
+          question: 'Riya has 9 crayons. She gets 6 more. How many crayons does she have now?',
+            options: ['13', '14', '15', '16'],
+            correctAnswer: '15',
+            acceptableAnswers: ['15', 'fifteen']
+          };
+        }
+
+        if (type === 'true_false') {
+          return {
+            ...baseQuestion,
+            question: '8 + 7 is the same as 10 + 5.',
+            options: ['True', 'False'],
+            correctAnswer: 'True'
+          };
+        }
+
+        if (type === 'fill_blank') {
+          return {
+            ...baseQuestion,
+            question: '12 + __ = 18',
+            correctAnswer: '6',
+            acceptableAnswers: ['6', 'six']
+          };
+        }
+
+        if (type === 'sequence_ordering') {
+          return {
+            ...baseQuestion,
+            question: 'Put these numbers from smallest to biggest.',
+            options: ['16', '9', '14', '11'],
+            correctAnswer: ['9', '11', '14', '16']
+          };
+        }
+
+        if (type === 'short_answer') {
+          return {
+            ...baseQuestion,
+            question: 'A box has 13 pencils. 5 are used. How many pencils are left?',
+            correctAnswer: '8',
+            acceptableAnswers: ['8', 'eight']
+          };
+        }
+      }
+
+      if (type === 'match_following' || type === 'simple_match') {
+        return {
+          ...baseQuestion,
+          question: 'Match the following.',
+          leftItems: ['A', 'B'],
+          rightItems: ['Ball', 'Apple'],
+          correctAnswer: {
+            A: 'Apple',
+            B: 'Ball'
+          },
+          marks: 2
+        };
+      }
+
+      if (type === 'true_false' || type === 'simple_true_false') {
+        return {
+          ...baseQuestion,
+          question: 'A fish can fly.',
+          options: ['True', 'False'],
+          correctAnswer: 'False'
+        };
+      }
+
+      if (type === 'reading_comprehension') {
+        return {
+          ...baseQuestion,
+          passage: 'Tom has a red ball.',
+          question: "What color is Tom's ball?",
+          correctAnswer: 'red',
+          acceptableAnswers: ['red']
+        };
+      }
+
+      if (type === 'categorization') {
+        return {
+          ...baseQuestion,
+          question: 'Group the items.',
+          visualElements: ['Cat', 'Rose'],
+          categories: ['Animals', 'Plants'],
+          correctAnswer: {
+            Animals: ['Cat'],
+            Plants: ['Rose']
+          },
+          marks: 2
+        };
+      }
+
+      if (
+        [
+          'picture_identification',
+          'count_and_answer',
+          'shape_recognition',
+          'color_recognition',
+          'odd_one_out',
+          'compare_objects',
+          'picture_mcq',
+          'pattern_recognition'
+        ].includes(type)
+      ) {
+        return {
+          ...baseQuestion,
+          visualElements: ['🐶', '🐱', '🐘', '🐟'],
+          options: type === 'picture_mcq' ? ['Dog', 'Cat', 'Elephant', 'Fish'] : undefined,
+          correctAnswer: type === 'picture_mcq' ? 'Dog' : '🐶'
+        };
+      }
+
+      return {
+        ...baseQuestion,
+        options: type === 'mcq' ? ['A', 'B', 'C', 'D'] : undefined
+      };
+    };
 
     const exam: GeneratedExam = {
       examId,

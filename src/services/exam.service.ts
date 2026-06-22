@@ -2,6 +2,8 @@ import { OperationType, Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { createAIProvider } from './ai';
 import { childService } from './child.service';
+import { examBlueprintService } from './examBlueprintService';
+import { examValidationService } from './examValidationService';
 import { planQuotaService } from './planQuotaService';
 import { usageService } from './usage.service';
 import { AppError } from '../utils/AppError';
@@ -63,7 +65,8 @@ export const examService = {
       difficulty: input.difficulty,
       questionCount: input.questionCount
     };
-    const { result } = await generateWithUsage(userId, resolvedInput);
+    const blueprint = examBlueprintService.createBlueprint(resolvedInput);
+    const { result } = await generateWithUsage(userId, resolvedInput, blueprint);
 
     const paper = await prisma.generatedExamPaper.create({
       data: {
@@ -167,10 +170,73 @@ export const examService = {
   }
 };
 
-const generateWithUsage = async (userId: string, resolvedInput: ResolvedGenerateExamInput) => {
+const generateWithUsage = async (
+  userId: string,
+  resolvedInput: ResolvedGenerateExamInput,
+  blueprint: ReturnType<typeof examBlueprintService.createBlueprint>
+) => {
   await planQuotaService.assertCanGenerateQuestions(userId, resolvedInput.questionCount);
 
-  const result = await aiProvider.generateExam(resolvedInput);
+  let lastValidationReasons: string[] = [];
+  let result: Awaited<ReturnType<typeof aiProvider.generateExam>> | undefined;
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      result = await aiProvider.generateExam(resolvedInput, blueprint);
+      const validation = examValidationService.validate(result.exam, blueprint);
+
+      if (validation.valid) {
+        console.info('Exam generation validation passed', {
+          grade: resolvedInput.grade,
+          subject: resolvedInput.subject,
+          difficulty: resolvedInput.difficulty,
+          selectedConcepts: blueprint.selectedConcepts,
+          questionTypeDistribution: blueprint.questionTypeDistribution,
+          attempt
+        });
+        break;
+      }
+
+      lastValidationReasons = validation.reasons;
+      console.warn('Exam generation validation failed', {
+        grade: resolvedInput.grade,
+        subject: resolvedInput.subject,
+        difficulty: resolvedInput.difficulty,
+        selectedConcepts: blueprint.selectedConcepts,
+        questionTypeDistribution: blueprint.questionTypeDistribution,
+        reasons: validation.reasons,
+        attempt
+      });
+    } catch (error) {
+      if (
+        error instanceof AppError &&
+        error.details &&
+        typeof error.details === 'object' &&
+        'reason' in error.details
+      ) {
+        throw error;
+      }
+
+      const reason = error instanceof Error ? error.message : 'Unknown generation error';
+      lastValidationReasons = [reason];
+      console.warn('Exam generation attempt failed', {
+        grade: resolvedInput.grade,
+        subject: resolvedInput.subject,
+        difficulty: resolvedInput.difficulty,
+        selectedConcepts: blueprint.selectedConcepts,
+        questionTypeDistribution: blueprint.questionTypeDistribution,
+        reason,
+        attempt
+      });
+    }
+  }
+
+  if (!result || !examValidationService.validate(result.exam, blueprint).valid) {
+    throw new AppError('Unable to generate a syllabus-aligned exam at this time. Please try again.', 502, {
+      code: 'SYLLABUS_ALIGNED_EXAM_GENERATION_FAILED',
+      reasons: lastValidationReasons
+    });
+  }
 
   await usageService.recordUsage(
     userId,
