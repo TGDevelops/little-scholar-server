@@ -17,6 +17,20 @@ import {
 import type { AIProvider, GenerateAnalyticsInsightResult, GenerateExamResult } from './AIProvider';
 import type { ExamBlueprint } from '../examBlueprintService';
 
+const GEMINI_MAX_ATTEMPTS = 3;
+const GEMINI_RETRY_DELAYS_MS = [500, 1_500];
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isTransientGeminiError = (message: string) =>
+  message.includes('503') ||
+  message.includes('UNAVAILABLE') ||
+  message.includes('high demand') ||
+  message.includes('429') ||
+  message.includes('RESOURCE_EXHAUSTED') ||
+  message.includes('rate limit') ||
+  message.includes('temporarily unavailable');
+
 export class GeminiProvider implements AIProvider {
   public readonly name = 'gemini';
   private readonly ai: GoogleGenAI | null;
@@ -103,8 +117,43 @@ export class GeminiProvider implements AIProvider {
     prompt: string,
     maxOutputTokens: number
   ): Promise<GenerateContentResponse> {
-    try {
-      if (this.useApiKey) {
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= GEMINI_MAX_ATTEMPTS; attempt += 1) {
+      try {
+        return await this.generateContentOnce(prompt, maxOutputTokens);
+      } catch (error) {
+        lastError = error;
+        const message = error instanceof Error ? error.message : 'Unknown Gemini provider error';
+
+        if (!isTransientGeminiError(message) || attempt === GEMINI_MAX_ATTEMPTS) {
+          break;
+        }
+
+        const retryDelayMs = GEMINI_RETRY_DELAYS_MS[attempt - 1] ?? 1_500;
+
+        console.warn('Gemini transient error; retrying request', {
+          provider: this.name,
+          model: env.GEMINI_MODEL,
+          useApiKey: this.useApiKey,
+          maxOutputTokens,
+          attempt,
+          retryDelayMs,
+          message
+        });
+
+        await delay(retryDelayMs);
+      }
+    }
+
+    return this.handleGenerateContentError(lastError, maxOutputTokens);
+  }
+
+  private async generateContentOnce(
+    prompt: string,
+    maxOutputTokens: number
+  ): Promise<GenerateContentResponse> {
+    if (this.useApiKey) {
         // Direct REST call to Generative Language API v1 using API key
         const url = `https://generativelanguage.googleapis.com/v1/models/${encodeURIComponent(
           env.GEMINI_MODEL
@@ -156,56 +205,62 @@ export class GeminiProvider implements AIProvider {
         throw new Error('AI provider not initialized');
       }
 
-      return await this.ai.models.generateContent({
-        model: env.GEMINI_MODEL,
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json',
-          temperature: 0.5,
-          maxOutputTokens
-        }
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown Gemini provider error';
-
-      if (message.includes('Could not load the default credentials') || message.includes('ADC')) {
-        throw new AppError('Google Application Default Credentials are not configured', 502, {
-          provider: this.name,
-          reason: 'ADC_NOT_CONFIGURED',
-          action:
-            'Run `gcloud auth application-default login` locally or deploy with a service account.'
-        });
+    return await this.ai.models.generateContent({
+      model: env.GEMINI_MODEL,
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        temperature: 0.5,
+        maxOutputTokens
       }
+    });
+  }
 
-      if (message.includes('PERMISSION_DENIED') || message.includes('403')) {
-        throw new AppError(
-          'Vertex AI request was denied for the configured Google Cloud project',
-          502,
-          {
-            provider: this.name,
-            reason: 'VERTEX_AI_PERMISSION_DENIED',
-            action:
-              'Enable Vertex AI API and grant the authenticated user or service account Vertex AI User permissions.'
-          }
-        );
-      }
+  private handleGenerateContentError(
+    error: unknown,
+    maxOutputTokens: number
+  ): never {
+    const message = error instanceof Error ? error.message : 'Unknown Gemini provider error';
 
-      console.error('Gemini provider request failed', {
+    if (message.includes('Could not load the default credentials') || message.includes('ADC')) {
+      throw new AppError('Google Application Default Credentials are not configured', 502, {
         provider: this.name,
-        model: env.GEMINI_MODEL,
-        useApiKey: this.useApiKey,
-        maxOutputTokens,
-        message
-      });
-
-      throw new AppError('Gemini provider request failed', 502, {
-        provider: this.name,
-        reason: 'GEMINI_PROVIDER_REQUEST_FAILED',
-        model: env.GEMINI_MODEL,
-        maxOutputTokens,
-        upstreamMessage: message
+        reason: 'ADC_NOT_CONFIGURED',
+        action:
+          'Run `gcloud auth application-default login` locally or deploy with a service account.'
       });
     }
+
+    if (message.includes('PERMISSION_DENIED') || message.includes('403')) {
+      throw new AppError(
+        'Vertex AI request was denied for the configured Google Cloud project',
+        502,
+        {
+          provider: this.name,
+          reason: 'VERTEX_AI_PERMISSION_DENIED',
+          action:
+            'Enable Vertex AI API and grant the authenticated user or service account Vertex AI User permissions.'
+        }
+      );
+    }
+
+    console.error('Gemini provider request failed', {
+      provider: this.name,
+      model: env.GEMINI_MODEL,
+      useApiKey: this.useApiKey,
+      maxOutputTokens,
+      message
+    });
+
+    throw new AppError('Gemini provider request failed', 502, {
+      provider: this.name,
+      reason: isTransientGeminiError(message)
+        ? 'GEMINI_PROVIDER_TEMPORARILY_UNAVAILABLE'
+        : 'GEMINI_PROVIDER_REQUEST_FAILED',
+      model: env.GEMINI_MODEL,
+      maxOutputTokens,
+      upstreamMessage: message
+    });
   }
 
   private parseJson(rawText: string): unknown {

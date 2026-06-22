@@ -16,11 +16,38 @@ export const questionTypeSchema = z.enum(questionTypes);
 export const examPaperStatusSchema = z.enum(['pending', 'completed', 'deleted']);
 
 const topicSchema = z.string().trim().min(1).max(80);
-const correctAnswerSchema = z.union([
+const optionalStringSchema = z.preprocess(
+  (value) => (value === '' ? undefined : value),
+  z.string().min(1).optional()
+);
+const optionalStringArraySchema = z.preprocess(
+  (value) => (Array.isArray(value) ? value.map((item) => String(item)) : value),
+  z.array(z.string().min(1)).optional()
+);
+const correctAnswerSchema = z.preprocess((value) => {
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item));
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, answer]) => [
+        key,
+        Array.isArray(answer) ? answer.map((item) => String(item)) : String(answer)
+      ])
+    );
+  }
+
+  return value;
+}, z.union([
   z.string(),
   z.array(z.string()),
   z.record(z.union([z.string(), z.array(z.string())]))
-]);
+]));
 const childIdParamsSchema = z
   .object({
     childId: z.string().uuid()
@@ -87,14 +114,14 @@ export const generatedQuestionSchema = z
     id: z.string().min(1),
     type: questionTypeSchema,
     question: z.string().min(1),
-    options: z.array(z.string()).optional(),
-    visualElements: z.array(z.string().min(1)).optional(),
-    leftItems: z.array(z.string().min(1)).optional(),
-    rightItems: z.array(z.string().min(1)).optional(),
-    passage: z.string().min(1).optional(),
-    categories: z.array(z.string().min(1)).optional(),
+    options: optionalStringArraySchema,
+    visualElements: optionalStringArraySchema,
+    leftItems: optionalStringArraySchema,
+    rightItems: optionalStringArraySchema,
+    passage: optionalStringSchema,
+    categories: optionalStringArraySchema,
     correctAnswer: correctAnswerSchema,
-    acceptableAnswers: z.array(z.string()).optional(),
+    acceptableAnswers: optionalStringArraySchema,
     explanation: z.string().min(1),
     topic: z.string().min(1),
     learningObjective: z.string().min(1),

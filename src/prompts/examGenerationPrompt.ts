@@ -80,6 +80,8 @@ export const buildExamGenerationPrompt = (
       'Follow difficultyGuidance for every question.',
       'Reject internally and rewrite any question that is too easy for the requested grade and difficulty.',
       'Every question must include id, type, question, correctAnswer, explanation, topic, learningObjective, difficultyLevel, and marks.',
+      'Omit optional fields that do not apply. Do not return empty strings for optional fields such as passage.',
+      'All options, visualElements, leftItems, rightItems, acceptableAnswers, and ordered-array correctAnswer values must be strings, even for numbers.',
       'Every mcq and picture_mcq question must include 4 options and exactly one correct option.',
       'Every true_false and simple_true_false question must include options ["True", "False"].',
       'Every missing_number question must include answer choices in options.',

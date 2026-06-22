@@ -2,7 +2,11 @@ import assert from 'node:assert/strict';
 import { examBlueprintService } from '../src/services/examBlueprintService';
 import { examValidationService } from '../src/services/examValidationService';
 import { AppError } from '../src/utils/AppError';
-import type { GeneratedExam, GeneratedQuestion } from '../src/validators/exam.validator';
+import {
+  generatedQuestionSchema,
+  type GeneratedExam,
+  type GeneratedQuestion
+} from '../src/validators/exam.validator';
 
 const buildValidQuestion = (
   partial: Partial<GeneratedQuestion> & Pick<GeneratedQuestion, 'type' | 'topic'>
@@ -126,6 +130,25 @@ const invalidTopicExam: GeneratedExam = {
 };
 
 assert.equal(examValidationService.validate(invalidTopicExam, gradeOneHardMaths).valid, false);
+
+const normalizedSequenceQuestion = generatedQuestionSchema.parse({
+  id: 'q-normalized-sequence',
+  type: 'sequence_ordering',
+  question: 'Put the numbers from smallest to largest.',
+  options: [20, 30, 10, 40],
+  correctAnswer: [10, 20, 30, 40],
+  passage: '',
+  acceptableAnswers: [],
+  explanation: 'The correct order is 10, 20, 30, 40.',
+  topic,
+  learningObjective: 'Arrange numbers in order.',
+  difficultyLevel: 'Hard',
+  marks: 1
+});
+
+assert.deepEqual(normalizedSequenceQuestion.options, ['20', '30', '10', '40']);
+assert.deepEqual(normalizedSequenceQuestion.correctAnswer, ['10', '20', '30', '40']);
+assert.equal(normalizedSequenceQuestion.passage, undefined);
 
 assert.throws(
   () =>
